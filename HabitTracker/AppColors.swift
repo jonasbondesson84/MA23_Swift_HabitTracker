@@ -11,7 +11,9 @@ import SwiftUI
 struct AppColors {
     static let backgroundColor = Color(red: 18/256, green: 29/256, blue: 47/256)
     static let sheetBackgroundColor = Color(red: 18/256, green: 60/256, blue: 100/256)
-    static let cardBackgroundColor = Color(red: 1/256, green: 165/256, blue: 126/256)
+    static let cardBackgroundColor = Color(red: 1/256, green: 1/256, blue: 126/256)
+    static let cardbackgroundColorEnd = Color(red: 1/256, green: 165/256, blue: 126/256)
+    static let cardBackgroundColorStart = Color(red: 1/256, green: 165/256, blue: 1/256)
     static let cardShadowColor = Color(red: 182/256, green: 248/256, blue: 219/256)
     static let buttonColor = Color(red: 1/256, green: 165/256, blue: 126/256)
 }

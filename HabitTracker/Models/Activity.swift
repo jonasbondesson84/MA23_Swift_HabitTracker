@@ -20,4 +20,11 @@ struct Activity: Identifiable, Decodable, Encodable {
 //    var officeWorkout : Bool
     var repeating : Bool
     var category : Category
+    
+    func formattedDate(date: Date?) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        guard let date = date else {return ""}
+        return String(date.formatted(date: .omitted, time: .shortened))
+    }
 }
