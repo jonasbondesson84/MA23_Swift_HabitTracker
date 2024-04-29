@@ -20,6 +20,8 @@ struct Activity: Identifiable, Decodable, Encodable {
 //    var officeWorkout : Bool
     var repeating : Bool
     var category : Category
+//    var registeredActivities = [ActivityEntry]()
+    var streak : Int = 0
     
     func formattedDate(date: Date?) -> String {
         let formatter = DateFormatter()
@@ -27,4 +29,12 @@ struct Activity: Identifiable, Decodable, Encodable {
         guard let date = date else {return ""}
         return String(date.formatted(date: .omitted, time: .shortened))
     }
+}
+
+struct ActivityEntry: Identifiable, Decodable, Encodable {
+    @DocumentID var docID: String?
+    var id = UUID()
+    var date = Date()
+    var start : Date?
+    var end : Date?
 }

@@ -267,7 +267,8 @@ struct ShowStartActivity : View {
                 Text("Do you want to start \(activity.name)?")
                 HStack {
                     Button(action: {
-                        userData.startActivity(activity: activity)
+                        userData.startActivityEntry(activity: activity)
+//                        userData.startActivity(activity: activity)
                         dismiss()
                     }, label: {
                         Text("Yes")
