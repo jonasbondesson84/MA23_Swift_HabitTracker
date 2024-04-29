@@ -10,6 +10,8 @@ import SwiftUI
 struct MyDayView: View {
     
     @EnvironmentObject var userData : UserViewModel
+//    @State var showActivity = false
+    
     
     var body: some View {
 
@@ -84,6 +86,7 @@ struct OfficeWorkOutView: View {
 struct TodaysActivitiesList: View {
     
     @EnvironmentObject var userData: UserViewModel
+    @State var selectedActivity : Activity? = nil
     var body: some View {
         VStack {
             Text("TODAYS ACTIVITIES")
@@ -100,6 +103,9 @@ struct TodaysActivitiesList: View {
                 ForEach (userData.user.todaysActivities) { activity in
                     
                     TodaysActivities(activity: activity)
+                        .onTapGesture {
+                            selectedActivity = activity
+                        }
                 }
                 .padding(.vertical, 2)
                 .listRowInsets(.init())
@@ -110,6 +116,19 @@ struct TodaysActivitiesList: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             
+        }
+        .sheet(item: $selectedActivity) { activity in
+            if activity.start == nil {
+                
+                ShowStartActivity(activity: activity)
+                    .presentationBackground(.background)
+                    .presentationDetents([.medium])
+            }
+            else {
+                ShowStopActivity(activity: activity)
+                    .presentationBackground(.background)
+                    .presentationDetents([.medium])
+            }
         }
     }
         
@@ -216,6 +235,71 @@ struct StreakView : View {
     }
 }
 
+struct ShowStartActivity : View {
+    @EnvironmentObject var userData: UserViewModel
+    @Environment(\.dismiss) var dismiss
+    var activity: Activity
+    
+    var body: some View {
+        ZStack {
+            AppColors.backgroundColor
+                .ignoresSafeArea()
+            VStack {
+                Text("Do you want to start \(activity.name)?")
+                HStack {
+                    Button(action: {
+                        userData.startActivity(activity: activity)
+                        dismiss()
+                    }, label: {
+                        Text("Yes")
+                    })
+                    Spacer()
+                    Button(action: {
+                        dismiss()
+                    }, label: {
+                        Text("No")
+                    })
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        
+        
+    }
+}
+
+struct ShowStopActivity : View {
+    @EnvironmentObject var userData: UserViewModel
+    @Environment(\.dismiss) var dismiss
+    var activity: Activity
+    
+    var body: some View {
+        ZStack {
+            AppColors.backgroundColor
+                .ignoresSafeArea()
+            VStack {
+                Text("Do you want to stop \(activity.name)?")
+                HStack {
+                    Button(action: {
+                        userData.stopActivity(activity: activity)
+                        dismiss()
+                    }, label: {
+                        Text("Yes")
+                    })
+                    Spacer()
+                    Button(action: {
+                        dismiss()
+                    }, label: {
+                        Text("No")
+                    })
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        
+        
+    }
+}
 
 
 #Preview {
