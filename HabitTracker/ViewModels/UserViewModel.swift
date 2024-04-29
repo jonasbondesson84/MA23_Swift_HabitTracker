@@ -17,6 +17,7 @@ class UserViewModel: ObservableObject {
     @Published var user = User(name: "Jonas", imageUrl: nil, streak: 0)  //Kolla med david varför den inte uppdateras i listan?
     @Published var categories = [Category]()
     let db = Firestore.firestore()
+    let auth = Auth.auth()
         let ACTIVITY = "activity"
         let WORKOUT = "officeWorkout"
     
@@ -31,6 +32,7 @@ class UserViewModel: ObservableObject {
         if let user = auth.currentUser {
             self.user.uid = user.uid
             listenToFireBase(userUID: user.uid)
+            getTodaysActivities()
             print("Was signed in")
         } else {
             print("was not signed in")
@@ -95,7 +97,7 @@ class UserViewModel: ObservableObject {
                     do {
                         let activity = try document.data(as: Activity.self)
                         self.user.activities.append(activity)
-//                        self.activities.append(activity)
+                        self.activities.append(activity)
                         self.categories.removeAll()
                     } catch {
                         print("Error reading from db")
@@ -122,6 +124,50 @@ class UserViewModel: ObservableObject {
         } catch {
             print("Error wrinting to Firestore")
         }
+    }
+    
+    func getTodaysActivities() {
+        self.user.todaysActivities.removeAll()
+        
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: Date())
+        let start = calendar.date(from: components)!
+        let end = calendar.date(byAdding: .day, value: 1, to: start)!
+        
+        guard let userID = auth.currentUser?.uid else {return}
+        
+        db.collection("users").document(userID).collection(ACTIVITY)
+            .whereField("date", isGreaterThan: start)
+            .whereField("date", isLessThan: end)
+            .addSnapshotListener() {snapshot, error in
+                guard let snapshot = snapshot else {return}
+                if let error = error {
+                    print("error loading todays activities: \(error)")
+                } else {
+                    self.user.todaysActivities.removeAll()
+                    for document in snapshot.documents {
+                        do {
+                            let activity = try document.data(as: Activity.self)
+                            self.user.todaysActivities.append(activity)
+                            
+                        } catch {
+                            print("Error reading from db")
+                        }
+                    }
+                }
+            }
+    }
+    
+    func startActivity(activity: Activity) {
+        guard let userID = auth.currentUser?.uid else {return}
+        guard let docID = activity.docID else {return}
+        db.collection("users").document(userID).collection(ACTIVITY).document(docID).updateData(["start": Date()])
+    }
+    
+    func stopActivity(activity: Activity) {
+        guard let userID = auth.currentUser?.uid else {return}
+        guard let docID = activity.docID else {return}
+        db.collection("users").document(userID).collection(ACTIVITY).document(docID).updateData(["end": Date()])
     }
     
     
