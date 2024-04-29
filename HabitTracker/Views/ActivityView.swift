@@ -45,7 +45,8 @@ struct AddActivitySheet: View {
     @Binding var showSheet: Bool
     @State var name: String = ""
     @State var date: Date = .now
-    @State var category : Category? = nil
+//    @State var category : CategoryEnum = .category(Category(name: "Running", image: "figure.run"))
+    @State var category : Category = Category(name: "", image: "")
     @State var recurrent : Bool = false
     @State var recurrentDays: Int = 1
     
@@ -72,6 +73,11 @@ struct AddActivitySheet: View {
                             ForEach(userData.categories) { category in
                                 Text("\(category.name)")
                             }
+//                            ForEach(CategoryEnum.allCategories, id: \.self) { category in
+//                                                if case let .category(categoryData) = category {
+//                                                    Text(categoryData.name).tag(category)
+//                                                }
+//                                            }
                         }
                         .pickerStyle(.menu)
                     }
@@ -88,11 +94,11 @@ struct AddActivitySheet: View {
                     .opacity(recurrent ? 1: 0)
                     HStack {
                         Button {
-                            if let category = category {
-                                let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category)
+                            
+                            let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category)
                                 userData.saveActivityToFireStore(activity: newActivity)
                                 showSheet = false
-                            }
+                            
                         } label: {
                             Text("Save")
                         }
@@ -109,7 +115,7 @@ struct AddActivitySheet: View {
         }
         .onAppear() {
             userData.createCategories()
-            category = userData.categories.first
+//            category = userData.categories.first
         }
     }
 }

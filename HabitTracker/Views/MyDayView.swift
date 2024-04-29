@@ -139,10 +139,20 @@ struct TodaysActivitiesList: View {
 struct TodaysActivities: View {
     @EnvironmentObject var userData: UserViewModel
     var activity: Activity
+    
     var body: some View {
+        
         ZStack {
-            RoundedRectangle(cornerRadius: 25.0)
-                .fill(AppColors.cardBackgroundColor)
+            if activity.end != nil {
+                RoundedRectangle(cornerRadius: 25.0)
+                    .fill(AppColors.cardbackgroundColorEnd)
+            } else if activity.start != nil {
+                RoundedRectangle(cornerRadius: 25.0)
+                    .fill(AppColors.cardBackgroundColorStart)
+            } else {
+                RoundedRectangle(cornerRadius: 25.0)
+                    .fill(AppColors.cardBackgroundColor)
+            }
             VStack {
                 HStack {
                     Image(systemName: activity.category.image)
@@ -155,7 +165,16 @@ struct TodaysActivities: View {
                     
                 }
                 HStack {
-                    
+                    if activity.start != nil {
+                        Image(systemName: activity.category.image)
+                        Text(": \(activity.formattedDate(date: activity.start))")
+                        
+                    }
+                    Spacer()
+                    if(activity.end != nil) {
+                        Image(systemName: "flag.checkered.2.crossed")
+                        Text(": \(activity.formattedDate(date: activity.end))")
+                    }
                 }
                 .padding(.top, 3)
                 
