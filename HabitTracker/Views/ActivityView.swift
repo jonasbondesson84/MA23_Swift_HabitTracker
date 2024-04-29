@@ -46,7 +46,7 @@ struct AddActivitySheet: View {
     @State var name: String = ""
     @State var date: Date = .now
 //    @State var category : CategoryEnum = .category(Category(name: "Running", image: "figure.run"))
-    @State var category : Category = Category(name: "", image: "")
+    @State var category : Category? //= Category(name: "Running", image: "figure.run")
     @State var recurrent : Bool = false
     @State var recurrentDays: Int = 1
     
@@ -71,7 +71,7 @@ struct AddActivitySheet: View {
                     LabeledContent("Category") {
                         Picker("", selection: $category) {
                             ForEach(userData.categories) { category in
-                                Text("\(category.name)")
+                                Text("\(category.name)").tag(category as Category)
                             }
 //                            ForEach(CategoryEnum.allCategories, id: \.self) { category in
 //                                                if case let .category(categoryData) = category {
@@ -94,9 +94,10 @@ struct AddActivitySheet: View {
                     .opacity(recurrent ? 1: 0)
                     HStack {
                         Button {
-                            
-                            let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category)
+                            if let category = category {
+                                let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category)
                                 userData.saveActivityToFireStore(activity: newActivity)
+                            }
                                 showSheet = false
                             
                         } label: {
@@ -114,8 +115,8 @@ struct AddActivitySheet: View {
             }
         }
         .onAppear() {
-            userData.createCategories()
-//            category = userData.categories.first
+//            userData.createCategories()
+            category = userData.categories.first
         }
     }
 }
@@ -181,7 +182,7 @@ struct MyOfficeWorkoutList: View {
         
         List {
             
-            ForEach (userData.user.officeWorkOut) {officeWorkOut in
+            ForEach (userData.officeWorkout) {officeWorkOut in
                 HStack {
                     Text(officeWorkOut.name)
                         .foregroundColor(.white)
