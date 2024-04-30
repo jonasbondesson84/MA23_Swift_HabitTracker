@@ -13,6 +13,7 @@ struct Activity: Identifiable, Decodable, Encodable {
     var id = UUID()
     var name : String
     var date : Date
+    var started: Int = 0
     var start : Date?
     var end : Date?
     var distance : Double?
@@ -22,6 +23,10 @@ struct Activity: Identifiable, Decodable, Encodable {
     var category : Category
 //    var registeredActivities = [ActivityEntry]()
     var streak : Int = 0
+    var lastEntry : ActivityEntry
+    var todaysEntry: ActivityEntry
+    var doneDate: Date?
+//    var entries = [ActivityEntry]()
     
     func formattedDate(date: Date?) -> String {
         let formatter = DateFormatter()
@@ -34,7 +39,7 @@ struct Activity: Identifiable, Decodable, Encodable {
 struct ActivityEntry: Identifiable, Decodable, Encodable {
     @DocumentID var docID: String?
     var id = UUID()
-    var date = Date()
+    var date : Date?
     var start : Date?
     var end : Date?
 }

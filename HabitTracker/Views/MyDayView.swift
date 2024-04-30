@@ -118,16 +118,24 @@ struct TodaysActivitiesList: View {
             
         }
         .sheet(item: $selectedActivity) { activity in
-            if activity.start == nil {
+            if let doneDate = activity.doneDate {
                 
-                ShowStartActivity(activity: activity)
-                    .presentationBackground(.background)
-                    .presentationDetents([.medium])
-            }
-            else {
-                ShowStopActivity(activity: activity)
-                    .presentationBackground(.background)
-                    .presentationDetents([.medium])
+            } else {
+                if let lastEntryDate = activity.todaysEntry.date {
+                    if !Calendar.current.isDateInToday(lastEntryDate) {
+                        ShowStartActivity(activity: activity)
+                            .presentationBackground(.background)
+                            .presentationDetents([.medium])
+                    } else {
+                        ShowStopActivity(activity: activity)
+                            .presentationBackground(.background)
+                            .presentationDetents([.medium])
+                    }
+                } else {
+                    ShowStartActivity(activity: activity)
+                        .presentationBackground(.background)
+                        .presentationDetents([.medium])
+                }
             }
         }
     }
@@ -143,15 +151,22 @@ struct TodaysActivities: View {
     var body: some View {
         
         ZStack {
-            if activity.end != nil {
-                RoundedRectangle(cornerRadius: 25.0)
-                    .fill(AppColors.cardbackgroundColorEnd)
-            } else if activity.start != nil {
-                RoundedRectangle(cornerRadius: 25.0)
-                    .fill(AppColors.cardBackgroundColorStart)
+            if let doneDate = activity.doneDate {
+                if Calendar.current.isDateInToday(doneDate) {
+                    RoundedRectangle(cornerRadius: 25.0)
+                        .fill(AppColors.cardbackgroundColorEnd)
+                }
             } else {
-                RoundedRectangle(cornerRadius: 25.0)
-                    .fill(AppColors.cardBackgroundColor)
+                if activity.todaysEntry.end != nil {
+                    RoundedRectangle(cornerRadius: 25.0)
+                        .fill(AppColors.cardbackgroundColorEnd)
+                } else if activity.todaysEntry.start != nil {
+                    RoundedRectangle(cornerRadius: 25.0)
+                        .fill(AppColors.cardBackgroundColorStart)
+                } else {
+                    RoundedRectangle(cornerRadius: 25.0)
+                        .fill(AppColors.cardBackgroundColor)
+                }
             }
             VStack {
                 HStack {
@@ -301,7 +316,7 @@ struct ShowStopActivity : View {
                 Text("Do you want to stop \(activity.name)?")
                 HStack {
                     Button(action: {
-                        userData.stopActivity(activity: activity)
+                        userData.stopActivityEntry(activity: activity)
                         dismiss()
                     }, label: {
                         Text("Yes")

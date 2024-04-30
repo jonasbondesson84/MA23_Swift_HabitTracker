@@ -74,13 +74,7 @@ struct AddActivitySheet: View {
                             ForEach(userData.categories) { category in
                                 Text("\(category.name)").tag(category as Category)
                             }
-//                            ForEach(CategoryEnum.allCategories, id: \.self) { category in
-//                                                if case let .category(categoryData) = category {
-//                                                    Text(categoryData.name).tag(category)
-//                                                }
-//                                            }
                         }
-                        
                         .pickerStyle(.menu)
                     }
                     LabeledContent("Recurrent") {
@@ -98,23 +92,25 @@ struct AddActivitySheet: View {
                         
                         Button (action: {
                             print("save")
-//                            if let category = category {
                             let thisCatagory = userData.categories[selectedCategory]
-                                let newActivity = Activity(name: name, date: date, repeating: recurrent, category: thisCatagory)
+                                let newActivity = Activity(name: name, date: date, repeating: recurrent, category: thisCatagory, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
                                 userData.saveActivityToFireStore(activity: newActivity)
-//                            }
                                 showSheet = false
                             
                         }, label: {
                             Text("Save")
                         })
+                        .buttonStyle(BorderlessButtonStyle())
+                        
                         Spacer()
+                        
                         Button (action: {
                             print("cancel")
                             showSheet = false
                         }, label: {
                             Text("Cancel")
                         })
+                        .buttonStyle(BorderlessButtonStyle())
                     }
                 }
                 .scrollContentBackground(.hidden)
