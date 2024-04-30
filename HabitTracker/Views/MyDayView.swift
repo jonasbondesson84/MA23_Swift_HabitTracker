@@ -62,7 +62,7 @@ struct OfficeWorkOutView: View {
                 
             List {
                 
-                ForEach (userData.user.officeWorkOut) {workout in
+                ForEach (userData.officeWorkout) {workout in
                     HStack {
                         Text(workout.name)
                             .foregroundColor(.white)
@@ -100,7 +100,7 @@ struct TodaysActivitiesList: View {
                 .fontWeight(.bold)
             List {
                 
-                ForEach (userData.user.todaysActivities) { activity in
+                ForEach (userData.todaysActivities) { activity in
                     
                     TodaysActivities(activity: activity)
                         .onTapGesture {

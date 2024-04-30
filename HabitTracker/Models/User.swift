@@ -14,9 +14,9 @@ class User : ObservableObject {
     var imageUrl : String?
     var streak : Int
     var badges = [Badge]()
-    @Published var activities = [Activity]()
-    @Published var todaysActivities = [Activity]()
-    @Published var officeWorkOut = [OfficeWorkout]()
+//    @Published var activities = [Activity]()
+//    @Published var todaysActivities = [Activity]()
+//    @Published var officeWorkOut = [OfficeWorkout]()
     
     init(name: String, imageUrl: String?, streak: Int, badges: [Badge] = [Badge]()) {
         self.name = name

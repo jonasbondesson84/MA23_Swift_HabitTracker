@@ -14,12 +14,14 @@ import Firebase
 class UserViewModel: ObservableObject {
     
     @Published var activities = [Activity]()
+    @Published var officeWorkout = [OfficeWorkout]()
     @Published var user = User(name: "Jonas", imageUrl: nil, streak: 0)  //Kolla med david varför den inte uppdateras i listan?
     @Published var categories = [Category]()
+    @Published var todaysActivities = [Activity]()
     let db = Firestore.firestore()
     let auth = Auth.auth()
-        let ACTIVITY = "activity"
-        let WORKOUT = "officeWorkout"
+    let ACTIVITY = "activity"
+    let WORKOUT = "officeWorkout"
     let ACTIVITY_ENTRY = "entry"
     
     init() {
@@ -33,7 +35,7 @@ class UserViewModel: ObservableObject {
         if let user = auth.currentUser {
             self.user.uid = user.uid
             listenToFireBase(userUID: user.uid)
-            getTodaysActivities()
+            
             print("Was signed in")
         } else {
             print("was not signed in")
@@ -58,6 +60,7 @@ class UserViewModel: ObservableObject {
     func listenToFireBase(userUID: String) {
         startListenActivity(userUID: userUID)
         startListenOfficeWorkout(userUID: userUID)
+//        getTodaysActivities()
     }
     
     func startListenOfficeWorkout(userUID : String) {
@@ -69,11 +72,11 @@ class UserViewModel: ObservableObject {
             if let error = error {
                 print("error loading office workout: \(error)")
             } else {
-                self.user.officeWorkOut.removeAll()
+                self.officeWorkout.removeAll()
                 for document in snapshot.documents {
                     do {
                         let workout = try document.data(as: OfficeWorkout.self)
-                        self.user.officeWorkOut.append(workout)
+                        self.officeWorkout.append(workout)
                         
                     } catch {
                         print("Error reading from db")
@@ -93,13 +96,17 @@ class UserViewModel: ObservableObject {
             if let error = error {
                 print("error loading activities: \(error)")
             } else {
-                self.user.activities.removeAll()
+                self.activities.removeAll()
+                self.todaysActivities.removeAll()
                 for document in snapshot.documents {
                     do {
                         let activity = try document.data(as: Activity.self)
-                        self.user.activities.append(activity)
-                        self.activities.append(activity)
-                        self.categories.removeAll()
+//                        self.user.activities.append(activity)
+                        if (activity.repeating && activity.date.timeIntervalSinceNow.sign == .minus) || Calendar.current.isDateInToday(activity.date) {
+                            self.todaysActivities.append(activity)
+                        }
+                        self.activities.append(activity) //------------------------------------------
+//                        self.categories.removeAll()
                     } catch {
                         print("Error reading from db")
                     }
@@ -128,7 +135,7 @@ class UserViewModel: ObservableObject {
     }
     
     func getTodaysActivities() {
-        self.user.todaysActivities.removeAll()
+        self.todaysActivities.removeAll()
         
         let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month, .day], from: Date())
@@ -145,11 +152,11 @@ class UserViewModel: ObservableObject {
                 if let error = error {
                     print("error loading todays activities: \(error)")
                 } else {
-                    self.user.todaysActivities.removeAll()
+                    self.todaysActivities.removeAll()
                     for document in snapshot.documents {
                         do {
                             let activity = try document.data(as: Activity.self)
-                            self.user.todaysActivities.append(activity)
+                            self.todaysActivities.append(activity)
                             
                         } catch {
                             print("Error reading from db")
@@ -172,7 +179,7 @@ class UserViewModel: ObservableObject {
                                 do {
                                     print(document.documentID)
                                     let activity = try document.data(as: Activity.self)
-                                    self.user.todaysActivities.append(activity)
+                                    self.todaysActivities.append(activity)
         
                                 } catch {
                                     print("Error reading from db")
