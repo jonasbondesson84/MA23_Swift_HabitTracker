@@ -60,7 +60,7 @@ class UserViewModel: ObservableObject {
     func listenToFireBase(userUID: String) {
         startListenActivity(userUID: userUID)
         startListenOfficeWorkout(userUID: userUID)
-        getTodaysActivities()
+//        getTodaysActivities()
     }
     
     func startListenOfficeWorkout(userUID : String) {
@@ -97,12 +97,16 @@ class UserViewModel: ObservableObject {
                 print("error loading activities: \(error)")
             } else {
                 self.activities.removeAll()
+                self.todaysActivities.removeAll()
                 for document in snapshot.documents {
                     do {
                         let activity = try document.data(as: Activity.self)
 //                        self.user.activities.append(activity)
+                        if (activity.repeating && activity.date.timeIntervalSinceNow.sign == .minus) || Calendar.current.isDateInToday(activity.date) {
+                            self.todaysActivities.append(activity)
+                        }
                         self.activities.append(activity) //------------------------------------------
-                        self.categories.removeAll()
+//                        self.categories.removeAll()
                     } catch {
                         print("Error reading from db")
                     }

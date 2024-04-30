@@ -46,7 +46,8 @@ struct AddActivitySheet: View {
     @State var name: String = ""
     @State var date: Date = .now
 //    @State var category : CategoryEnum = .category(Category(name: "Running", image: "figure.run"))
-    @State var category : Category? //= Category(name: "Running", image: "figure.run")
+    @State var category : Category = .emptyCategory //= Category(name: "Running", image: "figure.run")
+    @State var selectedCategory = 0
     @State var recurrent : Bool = false
     @State var recurrentDays: Int = 1
     
@@ -79,6 +80,7 @@ struct AddActivitySheet: View {
 //                                                }
 //                                            }
                         }
+                        
                         .pickerStyle(.menu)
                     }
                     LabeledContent("Recurrent") {
@@ -93,22 +95,26 @@ struct AddActivitySheet: View {
                     }
                     .opacity(recurrent ? 1: 0)
                     HStack {
-                        Button {
-                            if let category = category {
-                                let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category)
+                        
+                        Button (action: {
+                            print("save")
+//                            if let category = category {
+                            let thisCatagory = userData.categories[selectedCategory]
+                                let newActivity = Activity(name: name, date: date, repeating: recurrent, category: thisCatagory)
                                 userData.saveActivityToFireStore(activity: newActivity)
-                            }
+//                            }
                                 showSheet = false
                             
-                        } label: {
+                        }, label: {
                             Text("Save")
-                        }
+                        })
                         Spacer()
-                        Button {
+                        Button (action: {
+                            print("cancel")
                             showSheet = false
-                        } label: {
+                        }, label: {
                             Text("Cancel")
-                        }
+                        })
                     }
                 }
                 .scrollContentBackground(.hidden)
@@ -116,7 +122,7 @@ struct AddActivitySheet: View {
         }
         .onAppear() {
 //            userData.createCategories()
-            category = userData.categories.first
+//            category = userData.categories.first
         }
     }
 }
