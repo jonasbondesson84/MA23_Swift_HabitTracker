@@ -15,9 +15,10 @@ class UserViewModel: ObservableObject {
     
     @Published var activities = [Activity]()
     @Published var officeWorkout = [OfficeWorkout]()
-    @Published var user = User(name: "Jonas", imageUrl: nil, streak: 0)  //Kolla med david varför den inte uppdateras i listan?
+    @Published var user = User(name: "Jonas", imageUrl: nil)  //Kolla med david varför den inte uppdateras i listan?
     @Published var categories = [Category]()
     @Published var todaysActivities = [Activity]()
+    @Published var streak = 0
     let db = Firestore.firestore()
     let auth = Auth.auth()
     let ACTIVITY = "activity"
@@ -104,6 +105,7 @@ class UserViewModel: ObservableObject {
 //                        self.user.activities.append(activity)
                         if (activity.repeating && activity.date.timeIntervalSinceNow.sign == .minus) || Calendar.current.isDateInToday(activity.date) {
                             self.todaysActivities.append(activity)
+                            
                         }
                         self.activities.append(activity) //------------------------------------------
 //                        self.categories.removeAll()
@@ -114,6 +116,8 @@ class UserViewModel: ObservableObject {
             }
         }
     }
+    
+    
     
     func saveActivityToFireStore(activity: Activity) {
         guard let userID = self.user.uid else {return}
@@ -134,94 +138,22 @@ class UserViewModel: ObservableObject {
         }
     }
     
-    func getTodaysActivities() {
-        self.todaysActivities.removeAll()
-        
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .month, .day], from: Date())
-        let start = calendar.date(from: components)!
-        let end = calendar.date(byAdding: .day, value: 1, to: start)!
-        
-        guard let userID = auth.currentUser?.uid else {return}
-        
-        db.collection("users").document(userID).collection(ACTIVITY)
-            .whereField("date", isLessThan: end)
-            .whereField("repeating", isEqualTo: true)
-            .addSnapshotListener() {snapshot, error in
-                guard let snapshot = snapshot else {return}
-                if let error = error {
-                    print("error loading todays activities: \(error)")
-                } else {
-                    self.todaysActivities.removeAll()
-                    for document in snapshot.documents {
-                        do {
-                            let activity = try document.data(as: Activity.self)
-                            self.todaysActivities.append(activity)
-                            
-                        } catch {
-                            print("Error reading from db")
-                        }
-                    }
-                }
-                
-            }
-        db.collection("users").document(userID).collection(ACTIVITY)
-                    .whereField("date", isGreaterThan: start)
-                    .whereField("date", isLessThan: end)
-                    .whereField("repeating", isEqualTo: false)
-                    .addSnapshotListener() {snapshot, error in
-                        guard let snapshot = snapshot else {return}
-                        if let error = error {
-                            print("error loading todays activities: \(error)")
-                        } else {
-                           
-                            for document in snapshot.documents {
-                                do {
-                                    print(document.documentID)
-                                    let activity = try document.data(as: Activity.self)
-                                    self.todaysActivities.append(activity)
-        
-                                } catch {
-                                    print("Error reading from db")
-                                }
-                            }
-                        }
-                    }
-        
-//        self.user.todaysActivities.removeAll()
-//        
-//        let calendar = Calendar.current
-//        let components = calendar.dateComponents([.year, .month, .day], from: Date())
-//        let start = calendar.date(from: components)!
-//        let end = calendar.date(byAdding: .day, value: 1, to: start)!
-//        
-//        guard let userID = auth.currentUser?.uid else {return}
-//        
-//        db.collection("users").document(userID).collection(ACTIVITY)
-//            .whereField("date", isGreaterThan: start)
-//            .whereField("date", isLessThan: end)
-//            .addSnapshotListener() {snapshot, error in
-//                guard let snapshot = snapshot else {return}
-//                if let error = error {
-//                    print("error loading todays activities: \(error)")
-//                } else {
-//                    self.user.todaysActivities.removeAll()
-//                    for document in snapshot.documents {
-//                        do {
-//                            let activity = try document.data(as: Activity.self)
-//                            self.user.todaysActivities.append(activity)
-//                            
-//                        } catch {
-//                            print("Error reading from db")
-//                        }
-//                    }
-//                }
-//            }
-    }
-    
     func startActivityEntry(activity: Activity) {
         guard let userID = auth.currentUser?.uid else {return}
         guard let activityID = activity.docID else {return}
+        do {
+            try self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).collection(self.ACTIVITY_ENTRY).addDocument(from: ActivityEntry(date: Date.now, start: Date.now))
+//            self.updateActivityWith(lastEntry: activity)
+            self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).updateData(["todaysEntry.date": Date.now, "todaysEntry.start" : Date.now])
+        } catch {
+            print("Error writing start activity")
+        }
+    }
+    
+    func stopActivityEntry(activity: Activity) {
+        guard let userID = auth.currentUser?.uid else {return}
+        guard let activityID = activity.docID else {return}
+        
         db.collection("users").document(userID).collection(ACTIVITY).document(activityID).collection(ACTIVITY_ENTRY).getDocuments() {snapshot, error in
             guard let snapshot = snapshot else {return}
             if let error = error {
@@ -230,49 +162,90 @@ class UserViewModel: ObservableObject {
                 do {
                     for document in snapshot.documents {
                         let entry = try document.data(as: ActivityEntry.self)
-                        if Calendar.current.isDateInToday(entry.date) {
-                            print("add ending")
-                            //Lägga till slut
-                            if let docID = entry.docID {
-                                self.updateEntry(userID: userID, activityID: activityID, docID: docID)
-                                
-                                return
+                        print(entry)
+                        if let entryDate = entry.date {
+                            if Calendar.current.isDateInToday(entryDate) {
+                                if let docID = entry.docID {
+                                    self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).collection(self.ACTIVITY_ENTRY).document(docID).updateData(["end": Date.now]) {error in
+                                        if let error = error {
+                                            print("Error writing to database: \(error)")
+                                        } else {
+                                            self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).updateData(["todaysEntry.date": Date.now, "todaysEntry.end" : Date.now]) { error in
+                                                if let error = error {
+                                                    print("Error writing to database: \(error)")
+                                                } else {
+                                                    self.addToStreak(activity: activity)
+                                                    
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
-                    try self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).collection(self.ACTIVITY_ENTRY).addDocument(from: ActivityEntry(date: Date.now, start: Date.now))
-//                    let activity = try snapshot.data(as: Activity.self)
-//                    let activities = ActivityEntry()
-//                    for registeredActivity in activity.registeredActivities {
-//                        if Calendar.current.isDateInToday(registeredActivity.date) {
-//                            print("it is today")
-//                            let entry = ActivityEntry()
-//                        } else {
-//                            print("\(registeredActivity.date)")
-//                        }
-//                    }
+                    
+
                 } catch {
                     print("Error loading from database")
                 }
             }
         }
     }
+
     
-    func updateEntry(userID: String, activityID: String, docID: String) {
-        db.collection("users").document(userID).collection(ACTIVITY).document(activityID).collection(ACTIVITY_ENTRY).document(docID).updateData(["end": Date.now])
-    }
-    
-    func startActivity(activity: Activity) {
+    func addToStreak(activity: Activity) {
+        @EnvironmentObject var userData: UserViewModel
         guard let userID = auth.currentUser?.uid else {return}
-        guard let docID = activity.docID else {return}
-        db.collection("users").document(userID).collection(ACTIVITY).document(docID).updateData(["start": Date()])
+        if let activityID = activity.docID {
+            db.collection("users").document(userID).collection(ACTIVITY).document(activityID).getDocument {(document, error) in
+                if let document = document {
+                    do {
+                        let activity = try document.data(as: Activity.self)
+                        if let lastEntryDate = activity.lastEntry.date {
+                            if Calendar.current.isDateInYesterday(lastEntryDate) {
+                                self.startNewStreak(activity: activity, newStreak: false)
+                            }
+                            else {
+                                self.startNewStreak(activity: activity, newStreak: true)
+                            }
+                        } else {
+                            self.startNewStreak(activity: activity, newStreak: true)
+                        }
+                    } catch {
+                        print("Erroe")
+                    }
+                }
+            }
+        }
     }
     
-    func stopActivity(activity: Activity) {
-        guard let userID = auth.currentUser?.uid else {return}
+    func startNewStreak(activity: Activity, newStreak: Bool) {
+        guard let user = auth.currentUser else {return}
         guard let docID = activity.docID else {return}
-        db.collection("users").document(userID).collection(ACTIVITY).document(docID).updateData(["end": Date()])
+        guard let lastEntryDate = activity.todaysEntry.date else {return}
+        guard let lastEntyStart = activity.todaysEntry.start else {return}
+        guard let lastEntryEnd = activity.todaysEntry.end else {return}
+        
+        if newStreak {
+            let streak = 1
+        } else {
+            let streak = activity.streak + 1
+        }
+        
+        db.collection("users").document(user.uid).collection(ACTIVITY).document(docID).updateData(["streak": streak, "lastEntry.date": lastEntryDate, "lastEntry.start": lastEntyStart, "lastEntry.end": lastEntryEnd, "todaysEntry.date": FieldValue.delete(), "todaysEntry.start": FieldValue.delete(), "todaysEntry.end": FieldValue.delete(), "doneDate": Date.now])
     }
+    
+//    func updateStreakData(activity: Activity) {
+//        guard let user = auth.currentUser else {return}
+//        guard let docID = activity.docID else {return}
+//        guard let lastEntryDate = activity.todaysEntry.date else {return}
+//        guard let lastEntyStart = activity.todaysEntry.start else {return}
+//        guard let lastEntryEnd = activity.todaysEntry.end else {return}
+//        
+//        let streak = activity.streak + 1
+//        db.collection("users").document(user.uid).collection(ACTIVITY).document(docID).updateData(["streak": streak, "lastEntry.date": lastEntryDate, "lastEntry.start": lastEntyStart, "lastEntry.end": lastEntryEnd])
+//    }
     
     
 
@@ -287,19 +260,7 @@ class UserViewModel: ObservableObject {
     }
     
     func creatDummyData() {
-//        let strech = OfficeWorkout(name: "Strech", repeatTimeHours: 1.30)
-//        let pushup = OfficeWorkout(name: "Push ups", repeatTimeHours: 2.0)
-//
-//        user.officeWorkOut.append(strech)
-//        user.officeWorkOut.append(pushup)
-//
-//        let running = Activity(name: "Running", date: Date(), start: Date(), end: nil, officeWorkout: false, repeating: false, category: Category(name: "Runnning", image: "figure.run"))
-//        activities.append(running)
-//        let swimming = Activity(name: "Swimming", date: Date(), start: Date(), end: nil, officeWorkout: false, repeating: false, category: Category(name: "Swimming", image: "figure.pool.swim"))
-//        activities.append(swimming)
-//        user.todaysActivities.append(running)
-//        user.todaysActivities.append(swimming)
-//
+
         
         var badge = Badge(name: "5 days", category: "Running", image: "badge_blue")
         user.badges.append(badge)
