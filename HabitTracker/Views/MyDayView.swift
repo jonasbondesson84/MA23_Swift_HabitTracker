@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import UserNotifications
+
 
 struct MyDayView: View {
+    
     
     @EnvironmentObject var userData : UserViewModel
     @State var showStart: Bool = false
@@ -64,16 +67,18 @@ struct OfficeWorkOutView: View {
                 
             List {
                 
-                ForEach (userData.officeWorkout) {workout in
-                    HStack {
-                        Text(workout.name)
-                            .foregroundColor(.white)
-                            .padding(.leading, 20)
-                        Spacer()
-                        Text("\(workout.repeatTimeHours, specifier: "%.1f")")
-                            .foregroundColor(.white)
-                            .padding(.trailing, 20)
+                ForEach (userData.officeWorkouts) {workout in
+                    if workout.active {
+                        HStack {
+                            Text(workout.name)
+                                .foregroundColor(.white)
+                                .padding(.leading, 20)
+                            Spacer()
+                            Text("\(workout.repeatTimeHours) hours")
+                                .foregroundColor(.white)
+                                .padding(.trailing, 20)
                             
+                        }
                     }
                 }
                 

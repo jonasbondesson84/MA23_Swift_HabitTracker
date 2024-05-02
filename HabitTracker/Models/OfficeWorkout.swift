@@ -6,9 +6,12 @@
 //
 
 import Foundation
+import FirebaseFirestoreSwift
 
 struct OfficeWorkout: Identifiable, Decodable, Encodable {
+    @DocumentID var docID : String?
     var id = UUID()
     var name: String
-    var repeatTimeHours: Double
+    var repeatTimeHours: Int
+    var active = true
 }
