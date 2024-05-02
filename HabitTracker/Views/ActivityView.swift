@@ -185,14 +185,22 @@ struct MyOfficeWorkoutList: View {
         List {
             
             ForEach (userData.officeWorkouts) {officeWorkOut in
-                HStack {
-                    Text(officeWorkOut.name)
-                        .foregroundColor(.white)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.white)
+                
+                    HStack {
+                        Text(officeWorkOut.name)
+                            .foregroundColor(.white)
+                        Spacer()
+                        Image(systemName: officeWorkOut.active ? "star.fill": "star")
+                            .foregroundColor(officeWorkOut.active ? .yellow: .white)
+                            .onTapGesture {
+                                userData.updateWorkoutActiv(workout: officeWorkOut, active: !officeWorkOut.active)
+                            }
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.white)
+                        
+                    }
                 }
-            }
+            
             .padding(.vertical, 2)
             .listRowInsets(.init())
             .listRowBackground(AppColors.backgroundColor)

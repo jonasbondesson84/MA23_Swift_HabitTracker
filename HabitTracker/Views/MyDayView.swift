@@ -68,15 +68,17 @@ struct OfficeWorkOutView: View {
             List {
                 
                 ForEach (userData.officeWorkouts) {workout in
-                    HStack {
-                        Text(workout.name)
-                            .foregroundColor(.white)
-                            .padding(.leading, 20)
-                        Spacer()
-                        Text("\(workout.repeatTimeHours, specifier: "%.1f")")
-                            .foregroundColor(.white)
-                            .padding(.trailing, 20)
+                    if workout.active {
+                        HStack {
+                            Text(workout.name)
+                                .foregroundColor(.white)
+                                .padding(.leading, 20)
+                            Spacer()
+                            Text("\(workout.repeatTimeHours) hours")
+                                .foregroundColor(.white)
+                                .padding(.trailing, 20)
                             
+                        }
                     }
                 }
                 

@@ -376,6 +376,18 @@ class UserViewModel: ObservableObject {
             }
         }
     }
+    
+    func updateWorkoutActiv(workout: OfficeWorkout, active: Bool) {
+        guard let userID = auth.currentUser?.uid else {return}
+        guard let docID = workout.docID else {return}
+        db.collection("users").document(userID).collection(WORKOUT).document(docID).updateData(["active": active]) { error in
+            if let error = error {
+                print("Error updating workout")
+            } else {
+                self.setRemindersForOfficeHours()
+            }
+        }
+    }
 
         
     
