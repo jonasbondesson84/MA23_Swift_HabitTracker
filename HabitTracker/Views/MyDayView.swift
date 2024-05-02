@@ -10,6 +10,9 @@ import SwiftUI
 struct MyDayView: View {
     
     @EnvironmentObject var userData : UserViewModel
+    @State var showStart: Bool = false
+    @State var showEnd: Bool = false
+    @State var showDone: Bool = false
 //    @State var showActivity = false
     
     
@@ -36,6 +39,9 @@ struct MyDayView: View {
                     }
                 }
             }
+        .onAppear() {
+            userData.updateTodaysActivities()
+        }
         
             
 //        }
@@ -83,10 +89,11 @@ struct TodaysActivitiesList: View {
     
     @EnvironmentObject var userData: UserViewModel
     @State var selectedActivity : Activity? = nil
+    @State var showAlert = false
     var body: some View {
         VStack {
             Text("TODAYS ACTIVITIES")
-                
+            
                 .foregroundColor(.white)
                 .font(.system(size: 12))
                 .fontDesign(.rounded)
@@ -100,7 +107,13 @@ struct TodaysActivitiesList: View {
                     
                     TodaysActivities(activity: activity)
                         .onTapGesture {
-                            selectedActivity = activity
+                            if(userData.timer != nil && userData.startedActivityID != activity.docID) {
+                                showAlert = true
+                            } else {
+                                selectedActivity = activity
+                                
+                            }
+                            
                         }
                 }
                 .padding(.vertical, 2)
@@ -114,50 +127,22 @@ struct TodaysActivitiesList: View {
             
         }
         .sheet(item: $selectedActivity) { activity in
-            if let doneDate = activity.doneDate {
-                if Calendar.current.isDateInToday(doneDate) {
-                    ShowInfoSheet(activity: activity)
-                        .presentationBackground(.background)
-                        .presentationDetents([.medium])
-                } else {
-                    if let lastEntryDate = activity.todaysEntry.date {
-                        if !Calendar.current.isDateInToday(lastEntryDate) {
-                            ShowStartActivity(activity: activity)
-                                .presentationBackground(.background)
-                                .presentationDetents([.medium])
-                        } else {
-                            ShowStopActivity(activity: activity)
-                                .presentationBackground(.background)
-                                .presentationDetents([.medium])
-                        }
-                    } else {
-                        ShowStartActivity(activity: activity)
-                            .presentationBackground(.background)
-                            .presentationDetents([.medium])
-                    }
-                }
-            } else {
-                if let lastEntryDate = activity.todaysEntry.date {
-                    if !Calendar.current.isDateInToday(lastEntryDate) {
-                        ShowStartActivity(activity: activity)
-                            .presentationBackground(.background)
-                            .presentationDetents([.medium])
-                    } else {
-                        ShowStopActivity(activity: activity)
-                            .presentationBackground(.background)
-                            .presentationDetents([.medium])
-                    }
-                } else {
-                    ShowStartActivity(activity: activity)
-                        .presentationBackground(.background)
-                        .presentationDetents([.medium])
-                }
+            showActivitySheet(activity: activity)
+                .presentationBackground(.background)
+                .presentationDetents([.medium])
+            
+        }
+        .alert("You can't start another activity until the first one is completed", isPresented: $showAlert) {
+            Button("OK", role: .cancel) {
+                
             }
         }
     }
         
-        
 }
+        
+        
+
 
 struct ShowInfoSheet : View {
     @EnvironmentObject var userData: UserViewModel
@@ -393,10 +378,80 @@ struct ShowStopActivity : View {
             }
         }
         .scrollContentBackground(.hidden)
-        
-        
     }
 }
+
+struct showActivitySheet : View {
+
+        @EnvironmentObject var userData: UserViewModel
+        @Environment(\.dismiss) var dismiss
+        var activity: Activity
+        
+        var body: some View {
+            ZStack {
+                AppColors.backgroundColor
+                    .ignoresSafeArea()
+                VStack {
+                    
+                    if userData.showStart {
+                        ShowStartActivity(activity: activity)
+                        
+                    } else if userData.showEnd {
+                        ShowStopActivity(activity: activity)
+                    } else {
+                        ShowInfoSheet(activity: activity)
+                    }
+                    Text("TIME: \(userData.showTimerAsTime(seconds: userData.elapsedTime))")
+                        .foregroundColor(.white)
+                        .font(.system(size: 48))
+                    
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .onAppear() {
+                if let doneDate = activity.doneDate {
+                                if Calendar.current.isDateInToday(doneDate) {
+                                    userData.showDone = true
+                                    userData.showStart = false
+                                    userData.showEnd = false
+                                } else {
+                                    if let lastEntryDate = activity.todaysEntry.date {
+                                        if !Calendar.current.isDateInToday(lastEntryDate) {
+                                            userData.showDone = false
+                                            userData.showStart = true
+                                            userData.showEnd = false
+                                        } else {
+                                            userData.showDone = false
+                                            userData.showStart = false
+                                            userData.showEnd = true
+                                        }
+                                    } else {
+                                        userData.showDone = false
+                                        userData.showStart = true
+                                        userData.showEnd = false
+                                    }
+                                }
+                            } else {
+                                if let lastEntryDate = activity.todaysEntry.date {
+                                    if !Calendar.current.isDateInToday(lastEntryDate) {
+                                        userData.showDone = false
+                                        userData.showStart = true
+                                        userData.showEnd = false
+                                    } else {
+                                        userData.showDone = false
+                                        userData.showStart = false
+                                        userData.showEnd = true
+                                    }
+                                } else {
+                                    userData.showDone = false
+                                    userData.showStart = true
+                                    userData.showEnd = false
+                                }
+                            }
+            }
+        }
+}
+
 
 
 #Preview {
