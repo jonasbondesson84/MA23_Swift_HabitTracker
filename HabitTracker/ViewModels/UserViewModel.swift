@@ -21,7 +21,7 @@ class UserViewModel: ObservableObject {
         
     
     @Published var activities = [Activity]()
-    @Published var officeWorkout = [OfficeWorkout]()
+    @Published var officeWorkouts = [OfficeWorkout]()
     @Published var user = User(name: "Jonas", imageUrl: nil)  //Kolla med david varför den inte uppdateras i listan?
     @Published var categories = [Category]()
     @Published var todaysActivities = [Activity]()
@@ -80,16 +80,17 @@ class UserViewModel: ObservableObject {
             if let error = error {
                 print("error loading office workout: \(error)")
             } else {
-                self.officeWorkout.removeAll()
+                self.officeWorkouts.removeAll()
                 for document in snapshot.documents {
                     do {
                         let workout = try document.data(as: OfficeWorkout.self)
-                        self.officeWorkout.append(workout)
+                        self.officeWorkouts.append(workout)
                         
                     } catch {
                         print("Error reading from db")
                     }
                 }
+                self.setRemindersForOfficeHours()
             }
         }
     }
@@ -321,16 +322,6 @@ class UserViewModel: ObservableObject {
         }
     }
     
-//    func updateStreakData(activity: Activity) {
-//        guard let user = auth.currentUser else {return}
-//        guard let docID = activity.docID else {return}
-//        guard let lastEntryDate = activity.todaysEntry.date else {return}
-//        guard let lastEntyStart = activity.todaysEntry.start else {return}
-//        guard let lastEntryEnd = activity.todaysEntry.end else {return}
-//        
-//        let streak = activity.streak + 1
-//        db.collection("users").document(user.uid).collection(ACTIVITY).document(docID).updateData(["streak": streak, "lastEntry.date": lastEntryDate, "lastEntry.start": lastEntyStart, "lastEntry.end": lastEntryEnd])
-//    }
     
     func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
@@ -342,6 +333,51 @@ class UserViewModel: ObservableObject {
         timer?.invalidate()
         timer = nil
     }
+    
+    func setRemindersForOfficeHours() {
+        let center = UNUserNotificationCenter.current()
+        
+        center.removeAllPendingNotificationRequests()
+        
+        for workout in self.officeWorkouts {
+            if workout.active {
+                let content = UNMutableNotificationContent()
+                content.title = "Office Workout Reminder"
+                content.body = "It's time for your \(workout.name)!"
+                content.sound = UNNotificationSound.default
+                
+                var dateComponent = DateComponents()
+                
+                for repeating in 0...8 {
+                    let startHour = 8
+                    let endHour = 16
+                    let repeatTime = startHour + (workout.repeatTimeHours * repeating)
+                    if repeatTime < endHour && repeatTime > startHour{
+                        dateComponent.hour = repeatTime
+                        dateComponent.minute = 0
+                        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponent, repeats: true)
+                        
+                        //                    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+                        print("\(trigger)")
+                        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+                        center.add(request)
+                    }
+                }
+                
+                center.getPendingNotificationRequests { requests in
+                    for request in requests {
+                        print("Notification Identifier: \(request.identifier)")
+                        print("Notification Content: \(request.content)")
+                        print("Notification Trigger: \(request.trigger)")
+                        print("-----------------------------------")
+                    }
+                }
+                
+            }
+        }
+    }
+
+        
     
     
 

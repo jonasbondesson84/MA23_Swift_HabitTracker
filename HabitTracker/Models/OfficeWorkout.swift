@@ -10,5 +10,6 @@ import Foundation
 struct OfficeWorkout: Identifiable, Decodable, Encodable {
     var id = UUID()
     var name: String
-    var repeatTimeHours: Double
+    var repeatTimeHours: Int
+    var active = true
 }

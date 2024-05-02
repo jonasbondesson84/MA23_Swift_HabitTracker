@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import UserNotifications
+
 
 struct MyDayView: View {
+    
     
     @EnvironmentObject var userData : UserViewModel
     @State var showStart: Bool = false
@@ -64,7 +67,7 @@ struct OfficeWorkOutView: View {
                 
             List {
                 
-                ForEach (userData.officeWorkout) {workout in
+                ForEach (userData.officeWorkouts) {workout in
                     HStack {
                         Text(workout.name)
                             .foregroundColor(.white)

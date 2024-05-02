@@ -128,7 +128,7 @@ struct AddOfficeWorkoutSheet: View {
     @EnvironmentObject var userData : UserViewModel
     
     @State var name: String = ""
-    @State var repeatWorkout: Double = 1.0
+    @State var repeatWorkout: Int = 1
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -143,8 +143,8 @@ struct AddOfficeWorkoutSheet: View {
                     LabeledContent("Workout name:") {
                         TextField("", text: $name)
                     }
-                    LabeledContent("Repeat every: \(repeatWorkout, specifier: "%.1f") hour") {
-                        Stepper("", value: $repeatWorkout, in: 0.5...8, step: 0.5)
+                    LabeledContent("Repeat every: \(repeatWorkout) hour") {
+                        Stepper("", value: $repeatWorkout, in: 1...8, step: 1)
                     }
                     
                     HStack {
@@ -184,7 +184,7 @@ struct MyOfficeWorkoutList: View {
         
         List {
             
-            ForEach (userData.officeWorkout) {officeWorkOut in
+            ForEach (userData.officeWorkouts) {officeWorkOut in
                 HStack {
                     Text(officeWorkOut.name)
                         .foregroundColor(.white)
