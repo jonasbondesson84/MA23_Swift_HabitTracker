@@ -226,15 +226,42 @@ class UserViewModel: ObservableObject {
         guard let lastEntryDate = activity.todaysEntry.date else {return}
         guard let lastEntyStart = activity.todaysEntry.start else {return}
         guard let lastEntryEnd = activity.todaysEntry.end else {return}
-        
+        var streak = 0
         if newStreak {
-            let streak = 1
+            streak = 1
         } else {
-            let streak = activity.streak + 1
+            streak = activity.streak + 1
         }
         
         db.collection("users").document(user.uid).collection(ACTIVITY).document(docID).updateData(["streak": streak, "lastEntry.date": lastEntryDate, "lastEntry.start": lastEntyStart, "lastEntry.end": lastEntryEnd, "todaysEntry.date": FieldValue.delete(), "todaysEntry.start": FieldValue.delete(), "todaysEntry.end": FieldValue.delete(), "doneDate": Date.now])
     }
+    
+    func calculateActivityTime(activity: Activity)-> String {
+        guard let start = activity.lastEntry.start else {return "start error"}
+        guard let end = activity.lastEntry.end else {return "end error"}
+        
+        
+        
+        
+       let timeInSeconds = Int(end.timeIntervalSince(start))
+       
+        func formatDuration(_ durationInSeconds: Int) -> String {
+           let (hours, secondsAfterHours) = divmod(durationInSeconds, 3600)
+           let (minutes, seconds) = divmod(secondsAfterHours, 60)
+           return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        }
+        func divmod(_ numerator: Int, _ denominator: Int) -> (quotient: Int, remainder: Int) {
+           let quotient = numerator / denominator
+           let remainder = numerator % denominator
+           return (quotient, remainder)
+        }
+        
+        let formattedDuration = formatDuration(timeInSeconds)
+        
+        return formattedDuration
+    }
+    
+    
     
 //    func updateStreakData(activity: Activity) {
 //        guard let user = auth.currentUser else {return}

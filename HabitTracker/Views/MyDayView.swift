@@ -33,10 +33,6 @@ struct MyDayView: View {
                             
                         Spacer()
                         
-                        
-//                        TodaysActivities(vm: myDayViewModel)
-                        
-                        
                     }
                 }
             }
@@ -119,7 +115,27 @@ struct TodaysActivitiesList: View {
         }
         .sheet(item: $selectedActivity) { activity in
             if let doneDate = activity.doneDate {
-                
+                if Calendar.current.isDateInToday(doneDate) {
+                    ShowInfoSheet(activity: activity)
+                        .presentationBackground(.background)
+                        .presentationDetents([.medium])
+                } else {
+                    if let lastEntryDate = activity.todaysEntry.date {
+                        if !Calendar.current.isDateInToday(lastEntryDate) {
+                            ShowStartActivity(activity: activity)
+                                .presentationBackground(.background)
+                                .presentationDetents([.medium])
+                        } else {
+                            ShowStopActivity(activity: activity)
+                                .presentationBackground(.background)
+                                .presentationDetents([.medium])
+                        }
+                    } else {
+                        ShowStartActivity(activity: activity)
+                            .presentationBackground(.background)
+                            .presentationDetents([.medium])
+                    }
+                }
             } else {
                 if let lastEntryDate = activity.todaysEntry.date {
                     if !Calendar.current.isDateInToday(lastEntryDate) {
@@ -143,6 +159,25 @@ struct TodaysActivitiesList: View {
         
 }
 
+struct ShowInfoSheet : View {
+    @EnvironmentObject var userData: UserViewModel
+    var activity: Activity
+    var body: some View {
+        ZStack {
+            AppColors.backgroundColor
+                .ignoresSafeArea()
+            VStack {
+                Text("\(activity.name)")
+                    .foregroundColor(.white)
+                Text("Streak: \(activity.streak)")
+                    .foregroundColor(.white)
+                Text("Activity time: \(userData.calculateActivityTime(activity: activity))")
+                    .foregroundColor(.white)
+            }
+        }
+    }
+}
+
 
 struct TodaysActivities: View {
     @EnvironmentObject var userData: UserViewModel
@@ -155,6 +190,17 @@ struct TodaysActivities: View {
                 if Calendar.current.isDateInToday(doneDate) {
                     RoundedRectangle(cornerRadius: 25.0)
                         .fill(AppColors.cardbackgroundColorEnd)
+                }else {
+                    if activity.todaysEntry.end != nil {
+                        RoundedRectangle(cornerRadius: 25.0)
+                            .fill(AppColors.cardbackgroundColorEnd)
+                    } else if activity.todaysEntry.start != nil {
+                        RoundedRectangle(cornerRadius: 25.0)
+                            .fill(AppColors.cardBackgroundColorStart)
+                    } else {
+                        RoundedRectangle(cornerRadius: 25.0)
+                            .fill(AppColors.cardBackgroundColor)
+                    }
                 }
             } else {
                 if activity.todaysEntry.end != nil {
@@ -280,20 +326,28 @@ struct ShowStartActivity : View {
                 .ignoresSafeArea()
             VStack {
                 Text("Do you want to start \(activity.name)?")
+                    .foregroundColor(.white)
+                    .padding(.bottom, 20)
                 HStack {
+                    Spacer()
                     Button(action: {
                         userData.startActivityEntry(activity: activity)
 //                        userData.startActivity(activity: activity)
                         dismiss()
                     }, label: {
                         Text("Yes")
+                            .foregroundColor(.white)
                     })
+                    .buttonStyle(BorderlessButtonStyle())
                     Spacer()
                     Button(action: {
                         dismiss()
                     }, label: {
                         Text("No")
+                            .foregroundColor(.white)
                     })
+                    .buttonStyle(BorderlessButtonStyle())
+                    Spacer()
                 }
             }
         }
@@ -314,19 +368,27 @@ struct ShowStopActivity : View {
                 .ignoresSafeArea()
             VStack {
                 Text("Do you want to stop \(activity.name)?")
+                    .foregroundColor(.white)
+                    .padding(.bottom, 20)
                 HStack {
+                    Spacer()
                     Button(action: {
                         userData.stopActivityEntry(activity: activity)
                         dismiss()
                     }, label: {
                         Text("Yes")
+                            .foregroundColor(.white)
                     })
+                    .buttonStyle(BorderlessButtonStyle())
                     Spacer()
                     Button(action: {
                         dismiss()
                     }, label: {
                         Text("No")
+                            .foregroundColor(.white)
                     })
+                    .buttonStyle(BorderlessButtonStyle())
+                    Spacer()
                 }
             }
         }
