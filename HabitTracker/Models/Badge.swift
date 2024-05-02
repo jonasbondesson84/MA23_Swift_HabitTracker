@@ -8,9 +8,10 @@
 
 import Foundation
 
-struct Badge : Identifiable {
+struct Badge : Identifiable, Encodable, Decodable {
     var id = UUID()
     var name: String
+    var streak: Int
     var category: String
     var image: String
 }

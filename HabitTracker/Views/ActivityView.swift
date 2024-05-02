@@ -117,6 +117,7 @@ struct AddActivitySheet: View {
             }
         }
         .onAppear() {
+            
 //            userData.createCategories()
 //            category = userData.categories.first
         }

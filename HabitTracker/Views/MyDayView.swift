@@ -45,6 +45,9 @@ struct MyDayView: View {
         .onAppear() {
             userData.updateTodaysActivities()
         }
+        .alert("You got a new badge",isPresented: $userData.showNewBadge) {
+            Button("ok", role: .cancel) {}
+        }
         
             
 //        }
@@ -243,7 +246,7 @@ struct BadgesView: View {
     var body: some View {
         ScrollView(.horizontal) {
             LazyHStack {
-                ForEach(userData.user.badges ) { badge in
+                ForEach(userData.badges ) { badge in
                     ZStack{
                         Image(badge.image)
                             .resizable()
@@ -252,6 +255,10 @@ struct BadgesView: View {
                         Text(badge.name)
                             .font(.footnote)
                             .offset(y: -2)
+                        Text("\(badge.streak)")
+                            .font(.footnote)
+                            .offset(y: 15)
+                        
                     }
                 }
             }
