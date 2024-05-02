@@ -12,6 +12,13 @@ import FirebaseFirestore
 import Firebase
 
 class UserViewModel: ObservableObject {
+    @Published var showStart: Bool = false
+    @Published var showEnd: Bool = false
+    @Published var showDone: Bool = false
+    @Published var elapsedTime: TimeInterval = 0
+    var timer: Timer?
+    @Published var startedActivityID : String?
+        
     
     @Published var activities = [Activity]()
     @Published var officeWorkout = [OfficeWorkout]()
@@ -141,6 +148,8 @@ class UserViewModel: ObservableObject {
     func startActivityEntry(activity: Activity) {
         guard let userID = auth.currentUser?.uid else {return}
         guard let activityID = activity.docID else {return}
+        self.startTimer()
+        startedActivityID = activity.docID
         do {
             try self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).collection(self.ACTIVITY_ENTRY).addDocument(from: ActivityEntry(date: Date.now, start: Date.now))
 //            self.updateActivityWith(lastEntry: activity)
@@ -153,6 +162,8 @@ class UserViewModel: ObservableObject {
     func stopActivityEntry(activity: Activity) {
         guard let userID = auth.currentUser?.uid else {return}
         guard let activityID = activity.docID else {return}
+        self.stopTimer()
+        startedActivityID = nil
         
         db.collection("users").document(userID).collection(ACTIVITY).document(activityID).collection(ACTIVITY_ENTRY).getDocuments() {snapshot, error in
             guard let snapshot = snapshot else {return}
@@ -226,14 +237,88 @@ class UserViewModel: ObservableObject {
         guard let lastEntryDate = activity.todaysEntry.date else {return}
         guard let lastEntyStart = activity.todaysEntry.start else {return}
         guard let lastEntryEnd = activity.todaysEntry.end else {return}
-        
+        var streak = 0
         if newStreak {
-            let streak = 1
+            streak = 1
         } else {
-            let streak = activity.streak + 1
+            streak = activity.streak + 1
         }
         
         db.collection("users").document(user.uid).collection(ACTIVITY).document(docID).updateData(["streak": streak, "lastEntry.date": lastEntryDate, "lastEntry.start": lastEntyStart, "lastEntry.end": lastEntryEnd, "todaysEntry.date": FieldValue.delete(), "todaysEntry.start": FieldValue.delete(), "todaysEntry.end": FieldValue.delete(), "doneDate": Date.now])
+    }
+    
+    func calculateActivityTime(activity: Activity)-> String {
+        guard let start = activity.lastEntry.start else {return "start error"}
+        guard let end = activity.lastEntry.end else {return "end error"}
+        
+        
+        
+        
+       let timeInSeconds = Int(end.timeIntervalSince(start))
+       
+        func formatDuration(_ durationInSeconds: Int) -> String {
+           let (hours, secondsAfterHours) = divmod(durationInSeconds, 3600)
+           let (minutes, seconds) = divmod(secondsAfterHours, 60)
+           return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        }
+        func divmod(_ numerator: Int, _ denominator: Int) -> (quotient: Int, remainder: Int) {
+           let quotient = numerator / denominator
+           let remainder = numerator % denominator
+           return (quotient, remainder)
+        }
+        
+        let formattedDuration = formatDuration(timeInSeconds)
+        
+        return formattedDuration
+    }
+    
+    func showTimerAsTime(seconds: Double) ->String {
+        func formatDuration(_ durationInSeconds: Int) -> String {
+           let (hours, secondsAfterHours) = divmod(durationInSeconds, 3600)
+           let (minutes, seconds) = divmod(secondsAfterHours, 60)
+           return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        }
+        func divmod(_ numerator: Int, _ denominator: Int) -> (quotient: Int, remainder: Int) {
+           let quotient = numerator / denominator
+           let remainder = numerator % denominator
+           return (quotient, remainder)
+        }
+        
+        let formattedDuration = formatDuration(Int(seconds))
+        
+        return formattedDuration
+    }
+    
+    func updateTodaysActivities() {
+        guard let userSignedIn = auth.currentUser else {return}
+        let userID = userSignedIn.uid
+        
+        db.collection("users").document(userID).collection(ACTIVITY).getDocuments() {snapshot, error in
+            
+            guard let snapshot = snapshot else {return}
+            
+            if let error = error {
+                print("error loading activities: \(error)")
+            } else {
+//                self.activities.removeAll()
+                self.todaysActivities.removeAll()
+                for document in snapshot.documents {
+                    do {
+                        print("get data.")
+                        let activity = try document.data(as: Activity.self)
+//                        self.user.activities.append(activity)
+                        if (activity.repeating && activity.date.timeIntervalSinceNow.sign == .minus) || Calendar.current.isDateInToday(activity.date) {
+                            self.todaysActivities.append(activity)
+                            
+                        }
+//                        self.activities.append(activity) //------------------------------------------
+//                        self.categories.removeAll()
+                    } catch {
+                        print("Error reading from db")
+                    }
+                }
+            }
+        }
     }
     
 //    func updateStreakData(activity: Activity) {
@@ -246,6 +331,17 @@ class UserViewModel: ObservableObject {
 //        let streak = activity.streak + 1
 //        db.collection("users").document(user.uid).collection(ACTIVITY).document(docID).updateData(["streak": streak, "lastEntry.date": lastEntryDate, "lastEntry.start": lastEntyStart, "lastEntry.end": lastEntryEnd])
 //    }
+    
+    func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+            self.elapsedTime += 1
+        }
+    }
+
+    func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
     
     
 
