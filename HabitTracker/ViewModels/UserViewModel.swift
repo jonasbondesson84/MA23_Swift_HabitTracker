@@ -169,6 +169,33 @@ class UserViewModel: ObservableObject {
         }
     }
     
+    func updateActivity(activity: Activity) {
+        guard let userID = auth.currentUser?.uid else {return}
+        if let docID = activity.docID {
+            db.collection("users").document(userID).collection(ACTIVITY).document(docID).updateData([
+                "name" : activity.name,
+                "repeating" : activity.repeating,
+                "category.name" : activity.category.name,
+                "category.image" : activity.category.image,
+                "date" : activity.date
+                
+            ])
+            
+        }
+    }
+    
+    func deleteActivity(offset: IndexSet) {
+        guard let userID = auth.currentUser?.uid else {return}
+        for index in offset {
+            print("\(index)")
+            let activity = activities[index]
+            if let docID = activity.docID {
+                db.collection("users").document(userID).collection(ACTIVITY).document(docID).delete()
+            }
+        }
+        print("Delete")
+    }
+    
     func saveOfficeWorkoutToFireStore(workout: OfficeWorkout) {
         guard let userID = self.user.uid else {return}
         do {

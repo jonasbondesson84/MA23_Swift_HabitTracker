@@ -9,8 +9,11 @@ import SwiftUI
 
 struct ActivityView: View {
     @EnvironmentObject var userData: UserViewModel
-    @State var showAddActivity = false
+//    @State var showAddActivity = false
     @State var showAddOfficeWorkout = false
+//    @State var edit: Bool = false
+    
+    
     
     
     var body: some View {
@@ -18,37 +21,32 @@ struct ActivityView: View {
             AppColors.backgroundColor
                 .ignoresSafeArea()
             VStack {
-                MyActivityList(showSheet: $showAddActivity)
+                MyActivityList()
                     .padding(.bottom, 30)
                 MyOfficeWorkoutList(showSheet: $showAddOfficeWorkout)
                     .padding(.bottom, 30)
             }
         
         }
-        .sheet(isPresented: $showAddActivity, content: {
-            AddActivitySheet(showSheet: $showAddActivity)
-                .presentationBackground(.background)
-                .presentationDetents([.medium])
-        }
-        )
+        
         .sheet(isPresented: $showAddOfficeWorkout, content: {
             AddOfficeWorkoutSheet(showsheet: $showAddOfficeWorkout)
                 .presentationBackground(.background)
                 .presentationDetents([.medium])
         })
+        
     }
 }
 
-
-
 struct AddActivitySheet: View {
+    @Binding var activity : Activity?
+    @Binding var edit: Bool
     @Binding var showSheet: Bool
     @State var name: String = ""
     @State var date: Date = .now
-//    @State var category : CategoryEnum = .category(Category(name: "Running", image: "figure.run"))
     @State var category : Category = .emptyCategory //= Category(name: "Running", image: "figure.run")
     @State var selectedCategory = 0
-    @State var recurrent : Bool = false
+    @State var recurrent : Bool = true
     @State var recurrentDays: Int = 1
     
     @EnvironmentObject var userData : UserViewModel
@@ -70,7 +68,7 @@ struct AddActivitySheet: View {
                         DatePicker("", selection: $date)
                     }
                     LabeledContent("Category") {
-                        Picker("", selection: $selectedCategory) {
+                        Picker("", selection: $category) {
                             ForEach(userData.categories) { category in
                                 Text("\(category.name)").tag(category as Category)
                             }
@@ -92,13 +90,21 @@ struct AddActivitySheet: View {
                         
                         Button (action: {
                             print("save")
-                            let thisCatagory = userData.categories[selectedCategory]
-                                let newActivity = Activity(name: name, date: date, repeating: recurrent, category: thisCatagory, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
+//                            let thisCatagory = userData.categories[selectedCategory]
+                            if edit {
+                                if let activity = activity {
+                                    let updatedActivity = Activity(docID: activity.docID, name: name, date: date, repeating: recurrent, category: category, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
+                                    userData.updateActivity(activity: updatedActivity)
+                                }
+                            } else {
+                                
+                                let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
                                 userData.saveActivityToFireStore(activity: newActivity)
+                            }
                                 showSheet = false
                             
                         }, label: {
-                            Text("Save")
+                            Text(edit ? "Update" : "Save")
                         })
                         .buttonStyle(BorderlessButtonStyle())
                         
@@ -117,9 +123,22 @@ struct AddActivitySheet: View {
             }
         }
         .onAppear() {
+            print("Edit: \(edit)")
+            if edit {
+                
+                if let activity = activity {
+                    name = activity.name
+                    date = activity.date
+                    category = activity.category
+                    recurrent = activity.repeating
+                }
+            } else {
+                name = ""
+                date = Date.now
+                category = .emptyCategory
+                recurrent = true
+            }
             
-//            userData.createCategories()
-//            category = userData.categories.first
         }
     }
 }
@@ -174,6 +193,8 @@ struct AddOfficeWorkoutSheet: View {
 struct MyOfficeWorkoutList: View {
     @EnvironmentObject var userData: UserViewModel
     @Binding var showSheet: Bool
+    
+    
     var body: some View {
         Text("My Office Workouts")
             .foregroundColor(.white)
@@ -202,6 +223,7 @@ struct MyOfficeWorkoutList: View {
                     }
                 }
             
+            
             .padding(.vertical, 2)
             .listRowInsets(.init())
             .listRowBackground(AppColors.backgroundColor)
@@ -210,6 +232,8 @@ struct MyOfficeWorkoutList: View {
         .padding(.horizontal, 40)
         .scrollContentBackground(.hidden)
         .listStyle(.plain)
+        
+        
         
         Button(action: {
 
@@ -222,11 +246,17 @@ struct MyOfficeWorkoutList: View {
         .buttonStyle(AddButton())
         .padding(.horizontal, 40)
     }
+    
 }
 
 struct MyActivityList: View {
     @EnvironmentObject var userData: UserViewModel
-    @Binding var showSheet: Bool
+    @State var showSheet: Bool = false
+    @State var edit: Bool = false
+    @State var selectedActivity : Activity? = nil
+    @State var showWarning = false
+    @State var index : IndexSet?
+    
     
     var body: some View {
         Text("My Activities")
@@ -246,19 +276,43 @@ struct MyActivityList: View {
                     Image(systemName: "chevron.right")
                         .foregroundColor(.white)
                 }
+                .onTapGesture {
+                    selectedActivity = activity
+                    
+                    edit = true
+                    showSheet = true
+                }
             }
+            .onDelete(perform: { indexSet in
+                index = indexSet
+                showWarning = true
+                
+            })
             .padding(.vertical, 2)
             .listRowInsets(.init())
             .listRowBackground(AppColors.backgroundColor)
+            
         }
         .listStyle(.plain)
         .padding(.horizontal, 40)
         .scrollContentBackground(.hidden)
+        .sheet(isPresented: $showSheet, content: {
+            AddActivitySheet(activity: $selectedActivity, edit: $edit, showSheet: $showSheet)
+                .presentationBackground(.background)
+                .presentationDetents([.medium])
+        })
+        .confirmationDialog("Do you want to delete this activity?", isPresented: $showWarning) {
+            Button("Delete this activity?", role: .destructive) {
+                index != nil ? userData.deleteActivity(offset: index!) : print("didnt delete")
+            }
+        } message: {
+            Text("You cannot undo this action")
+          }
         
         Button(action: {
-
+            selectedActivity = nil
+            edit = false
             showSheet = true
-//            userData.saveActivityToFireStore(activity: Activity(name: "Running 5 km", date: .now,  repeating: true, category: Category(name: "Running", image: "figure.run")))
 
         }, label: {
             Label("Add activity", systemImage: "plus")
@@ -267,6 +321,7 @@ struct MyActivityList: View {
         .padding(.horizontal, 40)
         
     }
+        
 }
 
 
