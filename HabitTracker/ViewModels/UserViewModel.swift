@@ -84,7 +84,7 @@ class UserViewModel: ObservableObject {
             if let error = error {
                 print("error loading office workout: \(error)")
             } else {
-                self.officeWorkouts.removeAll()
+                self.badges.removeAll()
                 for document in snapshot.documents {
                     do {
                         let badge = try document.data(as: Badge.self)
@@ -112,9 +112,11 @@ class UserViewModel: ObservableObject {
             } else {
                 self.officeWorkouts.removeAll()
                 for document in snapshot.documents {
+                    
                     do {
                         let workout = try document.data(as: OfficeWorkout.self)
                         self.officeWorkouts.append(workout)
+//                        print("\(self.officeWorkouts.count)")
                         
                     } catch {
                         print("Error reading from db")
@@ -203,6 +205,29 @@ class UserViewModel: ObservableObject {
         } catch {
             print("Error wrinting to Firestore")
         }
+    }
+    func updateOfficeWorkout(workout: OfficeWorkout) {
+        guard let userID = auth.currentUser?.uid else {return}
+        if let docID = workout.docID {
+            db.collection("users").document(userID).collection(WORKOUT).document(docID).updateData([
+                "name" : workout.name,
+                "active" : workout.active,
+                "repeatTimeHours" : workout.repeatTimeHours
+            ])
+            
+        }
+    }
+    
+    func deleteOfficeWorkout(offset: IndexSet) {
+        guard let userID = auth.currentUser?.uid else {return}
+        for index in offset {
+            print("\(index)")
+            let workout = officeWorkouts[index]
+            if let docID = workout.docID {
+                db.collection("users").document(userID).collection(WORKOUT).document(docID).delete()
+            }
+        }
+        print("Delete")
     }
     
     func startActivityEntry(activity: Activity) {
@@ -420,20 +445,20 @@ class UserViewModel: ObservableObject {
                         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponent, repeats: true)
                         
                         //                    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-                        print("\(trigger)")
+//                        print("\(trigger)")
                         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
                         center.add(request)
                     }
                 }
                 
-                center.getPendingNotificationRequests { requests in
-                    for request in requests {
-                        print("Notification Identifier: \(request.identifier)")
-                        print("Notification Content: \(request.content)")
-                        print("Notification Trigger: \(request.trigger)")
-                        print("-----------------------------------")
-                    }
-                }
+//                center.getPendingNotificationRequests { requests in
+//                    for request in requests {
+//                        print("Notification Identifier: \(request.identifier)")
+//                        print("Notification Content: \(request.content)")
+//                        print("Notification Trigger: \(request.trigger)")
+//                        print("-----------------------------------")
+//                    }
+//                }
                 
             }
         }

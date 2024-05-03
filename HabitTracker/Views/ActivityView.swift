@@ -23,17 +23,11 @@ struct ActivityView: View {
             VStack {
                 MyActivityList()
                     .padding(.bottom, 30)
-                MyOfficeWorkoutList(showSheet: $showAddOfficeWorkout)
+                MyOfficeWorkoutList()
                     .padding(.bottom, 30)
             }
         
         }
-        
-        .sheet(isPresented: $showAddOfficeWorkout, content: {
-            AddOfficeWorkoutSheet(showsheet: $showAddOfficeWorkout)
-                .presentationBackground(.background)
-                .presentationDetents([.medium])
-        })
         
     }
 }
@@ -144,11 +138,14 @@ struct AddActivitySheet: View {
 }
 
 struct AddOfficeWorkoutSheet: View {
+    @Binding var workout : OfficeWorkout?
+    @Binding var edit: Bool
+    
     @Binding var showsheet: Bool
     @EnvironmentObject var userData : UserViewModel
     
     @State var name: String = ""
-    @State var repeatWorkout: Int = 1
+    @State var repeatTimeHours: Int = 1
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -163,28 +160,54 @@ struct AddOfficeWorkoutSheet: View {
                     LabeledContent("Workout name:") {
                         TextField("", text: $name)
                     }
-                    LabeledContent("Repeat every: \(repeatWorkout) hour") {
-                        Stepper("", value: $repeatWorkout, in: 1...8, step: 1)
+                    LabeledContent("Repeat every: \(repeatTimeHours) hour") {
+                        Stepper("", value: $repeatTimeHours, in: 1...8, step: 1)
                     }
                     
                     HStack {
                         Button {
-                            let newWorkout = OfficeWorkout(name: name, repeatTimeHours: repeatWorkout)
-                            userData.saveOfficeWorkoutToFireStore(workout: newWorkout)
+                            
+                            
+                            if edit {
+                                if let workout = workout {
+                                    let newWorkout = OfficeWorkout(docID: workout.docID, name: name, repeatTimeHours: repeatTimeHours)
+                                    userData.updateOfficeWorkout(workout: newWorkout)
+                                }
+                                
+                            } else {
+                                let newWorkout = OfficeWorkout(name: name, repeatTimeHours: repeatTimeHours)
+                                userData.saveOfficeWorkoutToFireStore(workout: newWorkout)
+                            }
+                            
                             showsheet = false
                             
                         } label: {
                             Text("Save")
                         }
+                        .buttonStyle(BorderlessButtonStyle())
                         Spacer()
                         Button {
                             showsheet = false
                         } label: {
                             Text("Cancel")
                         }
+                        .buttonStyle(BorderlessButtonStyle())
                     }
                 }
                 .scrollContentBackground(.hidden)
+                .onAppear() {
+                    if edit {
+                        if let workout = workout {
+                            name = workout.name
+                            repeatTimeHours = workout.repeatTimeHours
+                            
+                        } else {
+                            name = ""
+                            repeatTimeHours = 1
+                        }
+                        print("edit")
+                    }
+                }
             }
         }
     }
@@ -192,7 +215,11 @@ struct AddOfficeWorkoutSheet: View {
 
 struct MyOfficeWorkoutList: View {
     @EnvironmentObject var userData: UserViewModel
-    @Binding var showSheet: Bool
+    @State var showSheet: Bool = false
+    @State var edit: Bool = false
+    @State var selectedWorkout : OfficeWorkout? = nil
+    @State var index : IndexSet?
+    @State var showWarning = false
     
     
     var body: some View {
@@ -221,7 +248,17 @@ struct MyOfficeWorkoutList: View {
                             .foregroundColor(.white)
                         
                     }
+                    .onTapGesture {
+                        selectedWorkout = officeWorkOut
+                        edit = true
+                        showSheet = true
+                    }
                 }
+            .onDelete(perform: { indexSet in
+                index = indexSet
+                showWarning = true
+                
+            })
             
             
             .padding(.vertical, 2)
@@ -229,6 +266,18 @@ struct MyOfficeWorkoutList: View {
             .listRowBackground(AppColors.backgroundColor)
             
         }
+        .sheet(isPresented: $showSheet, content: {
+            AddOfficeWorkoutSheet(workout: $selectedWorkout, edit: $edit, showsheet: $showSheet)
+                .presentationBackground(.background)
+                .presentationDetents([.medium])
+        })
+        .confirmationDialog("Do you want to delete this activity?", isPresented: $showWarning) {
+            Button("Delete this activity?", role: .destructive) {
+                index != nil ? userData.deleteOfficeWorkout(offset: index!) : print("didnt delete")
+            }
+        } message: {
+            Text("You cannot undo this action")
+          }
         .padding(.horizontal, 40)
         .scrollContentBackground(.hidden)
         .listStyle(.plain)
@@ -236,7 +285,8 @@ struct MyOfficeWorkoutList: View {
         
         
         Button(action: {
-
+            selectedWorkout = nil
+            edit = false
             showSheet = true
 //            userData.saveOfficeWorkoutToFireStore(workout: OfficeWorkout(name: "Strech", repeatTimeHours: 1.5))
 
