@@ -70,7 +70,7 @@ struct AddActivitySheet: View {
                         DatePicker("", selection: $date)
                     }
                     LabeledContent("Category") {
-                        Picker("", selection: $category) {
+                        Picker("", selection: $selectedCategory) {
                             ForEach(userData.categories) { category in
                                 Text("\(category.name)").tag(category as Category)
                             }

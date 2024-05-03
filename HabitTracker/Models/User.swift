@@ -18,6 +18,7 @@ class User : ObservableObject {
 //    @Published var todaysActivities = [Activity]()
 //    @Published var officeWorkOut = [OfficeWorkout]()
     
+    
     init(name: String, imageUrl: String?, badges: [Badge] = [Badge]()) {
         self.name = name
         self.imageUrl = imageUrl

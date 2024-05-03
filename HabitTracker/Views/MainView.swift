@@ -21,7 +21,7 @@ struct MainView: View {
                 .tabItem {
                     Label("Activities", systemImage: "figure.walk")
                 }
-            CalendarView()
+            ActivityStatsView()
                 .tabItem {
                     Label("Calendar", systemImage: "calendar")
                 }
