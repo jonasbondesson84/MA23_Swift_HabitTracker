@@ -210,7 +210,7 @@ class UserViewModel: ObservableObject {
                         if let entryDate = entry.date {
                             if Calendar.current.isDateInToday(entryDate) {
                                 if let docID = entry.docID {
-                                    self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).collection(self.ACTIVITY_ENTRY).document(docID).updateData(["end": Date.now]) {error in
+                                    self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).collection(self.ACTIVITY_ENTRY).document(docID).updateData(["end": Date.now, "totalTime": entry.calculateTimeForActivityEntry()]) {error in
                                         if let error = error {
                                             print("Error writing to database: \(error)")
                                         } else {
@@ -218,6 +218,7 @@ class UserViewModel: ObservableObject {
                                                 if let error = error {
                                                     print("Error writing to database: \(error)")
                                                 } else {
+                                                    
                                                     self.addToStreak(activity: activity)
                                                     
                                                 }

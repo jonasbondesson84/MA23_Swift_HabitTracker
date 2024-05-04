@@ -45,6 +45,12 @@ struct ActivityEntry: Identifiable, Decodable, Encodable, Hashable {
     var end : Date?
     var totalTime: Int?
     var actitivyID: String?
+    
+    func calculateTimeForActivityEntry() -> Int {
+        guard let start = start else {return 0}
+         let end = Date.now
+        return Int(end.timeIntervalSince(start))
+    }
 }
 
 struct ActivityStats: Identifiable, Decodable, Encodable, Hashable {

@@ -24,16 +24,16 @@ struct ActivityStatsView: View {
                 }
 //                Text(userData.activityStats[selectedActivity].name)
                 Chart(selectedActivity.entries, id: \.date) {entry in
-//                    if let totalTime = entry.totalTime {
+                    if let totalTime = entry.totalTime {
                         if let date = entry.date {
                             BarMark(
-                                x: .value("Date", date),
-                                y: .value("Time", 10), width: 20
+                                x: .value("Date", date, unit: .day),
+                                y: .value("Time", totalTime)//, width: 20
                             )
                             .cornerRadius(10)
                             
                         }
-//                    }
+                    }
                     
                 }
 //                .chartYAxis(.hidden)
