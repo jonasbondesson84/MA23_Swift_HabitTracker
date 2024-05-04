@@ -16,8 +16,8 @@ struct Activity: Identifiable, Decodable, Encodable {
     var started: Int = 0
     var start : Date?
     var end : Date?
-    var distance : Double?
-    var repetitions : Double?
+//    var distance : Double?
+//    var repetitions : Double?
 //    var officeWorkout : Bool
     var repeating : Bool
     var category : Category
