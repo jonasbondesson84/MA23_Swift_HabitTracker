@@ -35,7 +35,7 @@ struct MyDayView: View {
                         
                         TodaysActivitiesList()
                             
-                        OfficeWorkOutView()
+                        OfficeWorkoutList()
                             
                         Spacer()
                         
@@ -55,7 +55,7 @@ struct MyDayView: View {
     
 }
 
-struct OfficeWorkOutView: View {
+struct OfficeWorkoutList: View {
     @EnvironmentObject var userData: UserViewModel
     var body: some View {
         VStack {
