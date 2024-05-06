@@ -411,7 +411,7 @@ class UserViewModel: ObservableObject {
             var totalStreak = user.totalStreak
             if Calendar.current.isDateInYesterday(lastDate) {
                 totalStreak += 1
-            } else {
+            } else if !Calendar.current.isDateInToday(lastDate){
                 totalStreak = 1
             }
             print("\(totalStreak)")

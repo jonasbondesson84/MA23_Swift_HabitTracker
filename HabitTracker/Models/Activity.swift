@@ -63,5 +63,5 @@ struct ActivityStats: Identifiable, Decodable, Encodable, Hashable {
 }
 extension ActivityStats {
 //    static let emptyStats = ActivityStats(name: "Running", entries: [ActivityEntry]())
-    static let emptyStats = ActivityStats(name: "", entries: [ActivityEntry](), entriesDay: [ActivityEntry](), entriesWeek: [ActivityEntry](), entriesMonth: [ActivityEntry]())
+    static let emptyStats = ActivityStats(name: "placeHolderEmpty", entries: [ActivityEntry](), entriesDay: [ActivityEntry](), entriesWeek: [ActivityEntry](), entriesMonth: [ActivityEntry]())
 }

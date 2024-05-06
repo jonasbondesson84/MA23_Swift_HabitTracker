@@ -157,17 +157,19 @@ struct ShowInfoSheet : View {
     var activity: Activity
     var body: some View {
         ZStack {
-            AppColors.backgroundColor
+            AppColors.transparent
                 .ignoresSafeArea()
             VStack {
                 Text("\(activity.name)")
                     .foregroundColor(.white)
+                    .font(.title)
                 Text("Streak: \(activity.streak)")
                     .foregroundColor(.white)
-                Text("Activity time: \(userData.calculateActivityTime(activity: activity))")
-                    .foregroundColor(.white)
+                    .font(.title)
             }
+            .scrollContentBackground(.hidden)
         }
+        
     }
 }
 
@@ -210,32 +212,86 @@ struct TodaysActivities: View {
             VStack {
                 HStack {
                     Image(systemName: activity.category.image)
-                        .padding(.leading)
+                        .padding(.leading, 40)
                     Text(activity.name)
-                        .font(.system(size: 14))
+                        .font(.system(size: 18))
+                    
                     Spacer()
-                    Image(systemName: "info.circle")
-                        .padding(.trailing)
                     
                 }
+                
+                
                 HStack {
-                    if activity.start != nil {
-                        Image(systemName: activity.category.image)
-                        Text(": \(activity.formattedDate(date: activity.start))")
-                        
+                    Image(systemName: "clock")
+                        .padding(.leading, 40)
+//                    if activity.todaysEntry.start != nil && activity.todaysEntry.end != nil {
+                    
+                    if let date = activity.lastEntry.date {
+                        if Calendar.current.isDateInToday(date) {
+                            if let endDate = activity.lastEntry.end {
+                                Text("\(userData.calculateActivityTime(activity: activity))")
+                                                                                            .multilineTextAlignment(.center)
+                                                                                            .font(.system(size: 18))
+                            }
+                        } else if let startDate = activity.todaysEntry.start {
+                            Text("\(userData.showTimerAsTime(seconds: Double(userData.elapsedTime)))")
+                                                            .multilineTextAlignment(.center)
+                                                            .font(.system(size: 18))
+                        } else {
+                            Text("\(userData.showTimerAsTime(seconds: 0.0))")
+                                                            .multilineTextAlignment(.center)
+                                                            .font(.system(size: 18))
+                        }
+            
+//                        if let endDate = activity.lastEntry.end {
+//                            Text("\(userData.calculateActivityTime(activity: activity))")
+//                                                            .multilineTextAlignment(.center)
+//                                                            .font(.system(size: 18))
+//                        } else if let startDate = activity.lastEntry.start {
+//                            
+//                        } else {
+//                            
+//                        }
+                    } else {
+                        Text("\(userData.showTimerAsTime(seconds: 0.0))")
+                                                        .multilineTextAlignment(.center)
+                                                        .font(.system(size: 18))
                     }
+                    
+                    
+//                    if let date = activity.lastEntry.end {
+//                        if Calendar.current.isDateInToday(date) {
+//                            Text("\(userData.calculateActivityTime(activity: activity))")
+//                                .multilineTextAlignment(.center)
+//                                .font(.system(size: 18))
+//                        } else {
+//                            Text("\(userData.showTimerAsTime(seconds: Double(userData.elapsedTime)))")
+//                                .multilineTextAlignment(.center)
+//                                .font(.system(size: 18))
+//                        }
+//                    } else {
+//                        if let start = activity.lastEntry.start {
+//                            if Calendar.current.isDateInToday(start) {
+//                                Text("\(userData.showTimerAsTime(seconds: Double(userData.elapsedTime)))")
+//                                    .multilineTextAlignment(.center)
+//                                    .font(.system(size: 18))
+//                            }
+//                        } else {
+//                            Text("\(userData.showTimerAsTime(seconds: 0.0))")
+//                                .multilineTextAlignment(.center)
+//                                .font(.system(size: 18))
+//                        }
+//                        }
+                    
+                    
                     Spacer()
-                    if(activity.end != nil) {
-                        Image(systemName: "flag.checkered.2.crossed")
-                        Text(": \(activity.formattedDate(date: activity.end))")
-                    }
                 }
                 .padding(.top, 3)
                 
             }
             
         }
-        .frame(height: 100)
+        .frame(height: 120)
         .padding(.horizontal, 40)
         .listRowBackground(AppColors.backgroundColor)
     }
@@ -255,8 +311,11 @@ struct BadgesView: View {
                         Image(systemName: badge.categoryImage)
                             .offset(y: -15)
                         Text(badge.name)
+                            .padding(.leading, 2)
                             .font(.footnote)
                             .offset(y: -2)
+                            .frame(width: 60, height: 20)
+                            .truncationMode(.tail)
                         Text("\(badge.streak)")
                             .font(.footnote)
                             .offset(y: 15)
@@ -327,20 +386,22 @@ struct ShowStartActivity : View {
     
     var body: some View {
         ZStack {
-            AppColors.backgroundColor
+            AppColors.transparent
                 .ignoresSafeArea()
+            Spacer()
             VStack {
                 Text("Do you want to start \(activity.name)?")
+                    .font(.title)
                     .foregroundColor(.white)
                     .padding(.bottom, 20)
                 HStack {
                     Spacer()
                     Button(action: {
                         userData.startActivityEntry(activity: activity)
-//                        userData.startActivity(activity: activity)
                         dismiss()
                     }, label: {
                         Text("Yes")
+                            .font(.title)
                             .foregroundColor(.white)
                     })
                     .buttonStyle(BorderlessButtonStyle())
@@ -349,14 +410,17 @@ struct ShowStartActivity : View {
                         dismiss()
                     }, label: {
                         Text("No")
+                            .font(.title)
                             .foregroundColor(.white)
                     })
                     .buttonStyle(BorderlessButtonStyle())
                     Spacer()
                 }
             }
+            
         }
         .scrollContentBackground(.hidden)
+        .ignoresSafeArea()
         
         
     }
@@ -369,10 +433,11 @@ struct ShowStopActivity : View {
     
     var body: some View {
         ZStack {
-            AppColors.backgroundColor
+            AppColors.transparent
                 .ignoresSafeArea()
             VStack {
                 Text("Do you want to stop \(activity.name)?")
+                    .font(.title)
                     .foregroundColor(.white)
                     .padding(.bottom, 20)
                 HStack {
@@ -382,6 +447,7 @@ struct ShowStopActivity : View {
                         dismiss()
                     }, label: {
                         Text("Yes")
+                            .font(.title)
                             .foregroundColor(.white)
                     })
                     .buttonStyle(BorderlessButtonStyle())
@@ -390,6 +456,7 @@ struct ShowStopActivity : View {
                         dismiss()
                     }, label: {
                         Text("No")
+                            .font(.title)
                             .foregroundColor(.white)
                     })
                     .buttonStyle(BorderlessButtonStyle())
@@ -398,6 +465,7 @@ struct ShowStopActivity : View {
             }
         }
         .scrollContentBackground(.hidden)
+        .ignoresSafeArea()
     }
 }
 
@@ -409,8 +477,8 @@ struct showActivitySheet : View {
         
         var body: some View {
             ZStack {
-                AppColors.backgroundColor
-                    .ignoresSafeArea()
+//                AppColors.sheetBackgroundColor
+//                    .ignoresSafeArea()
                 VStack {
                     
                     if userData.showStart {
@@ -421,12 +489,34 @@ struct showActivitySheet : View {
                     } else {
                         ShowInfoSheet(activity: activity)
                     }
-                    Text("TIME: \(userData.showTimerAsTime(seconds: userData.elapsedTime))")
+                    Text("TIME:")
                         .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
                         .font(.system(size: 48))
+                    if let date = activity.lastEntry.end {
+                        if Calendar.current.isDateInToday(date) {
+                            Text("\(userData.calculateActivityTime(activity: activity))")
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.white)
+                                .font(.system(size: 48))
+                        } else {
+                            Text("\(userData.showTimerAsTime(seconds: Double(userData.elapsedTime)))")
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.white)
+                                .font(.system(size: 48))
+                        }
+                    } else {
+                            Text("\(userData.showTimerAsTime(seconds: Double(userData.elapsedTime)))")
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.white)
+                                .font(.system(size: 48))
+                        }
                     
                 }
             }
+            .background(
+                AppColors.gradient
+            )
             .scrollContentBackground(.hidden)
             .onAppear() {
                 if let doneDate = activity.doneDate {

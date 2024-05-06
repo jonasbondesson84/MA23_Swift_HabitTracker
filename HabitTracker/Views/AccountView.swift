@@ -46,7 +46,7 @@ struct AccountView: View {
                         TextField("Name", text: $name)
                             
                             .padding()
-                            .background(Color.gray)
+                            .background(AppColors.textFieldBackgroundColor)
                             .cornerRadius(20.0)
                             
                        
