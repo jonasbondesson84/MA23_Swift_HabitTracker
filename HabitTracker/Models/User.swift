@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import FirebaseFirestoreSwift
 
-class User : ObservableObject, Decodable {
+class User : ObservableObject, Decodable, Encodable {
+    @DocumentID var docIC : String?
     var uid : String?
     var name: String
 //    var sex: Int //0 = Female, 1 = Male, 2 = Other
@@ -20,12 +22,13 @@ class User : ObservableObject, Decodable {
     var totalStreak: Int
     var lastDateForStreak : Date?
     
-    init(name: String, imageUrl: String?, badges: [Badge] = [Badge]()) {
+    init(name: String, imageUrl: String?, badges: [Badge] = [Badge](), lastDateForStreak: Date?) {
         self.name = name
         self.imageUrl = imageUrl
 //        self.streak = streak
         self.badges = badges
         self.totalStreak = 0
+        self.lastDateForStreak = lastDateForStreak
     }
     
     func getTarget() -> Int{

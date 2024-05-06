@@ -42,6 +42,9 @@ struct AccountView: View {
                 
             }
             .navigationBarItems(trailing: Image(systemName: "rectangle.portrait.and.arrow.right")
+                .onTapGesture {
+                    userData.signOut()
+                }
                 .foregroundColor(.white))
             
         }

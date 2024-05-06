@@ -25,10 +25,11 @@ class UserViewModel: ObservableObject {
     
     @Published var activities = [Activity]()
     @Published var officeWorkouts = [OfficeWorkout]()
-    @Published var user = User(name: "Jonas", imageUrl: nil)  //Kolla med david varför den inte uppdateras i listan?
+    @Published var user = User(name: "Jonas", imageUrl: nil, lastDateForStreak: nil)  //Kolla med david varför den inte uppdateras i listan?
     @Published var categories = [Category]()
     @Published var todaysActivities = [Activity]()
     @Published var streak = 0
+    @Published var loggedIn = false
     let db = Firestore.firestore()
     let auth = Auth.auth()
     let ACTIVITY = "activity"
@@ -42,31 +43,56 @@ class UserViewModel: ObservableObject {
         createCategories()
     }
     
+    func signOut() {
+        do {
+            try auth.signOut()
+            loggedIn = false
+        } catch {
+            print("Didnt signed out")
+        }
+    }
+    
     func checkSignIn() {
         let auth = Auth.auth()
         if let user = auth.currentUser {
             self.user.uid = user.uid
+            loggedIn = true
             listenToFireBase(userUID: user.uid)
+            getUserData(userID: user.uid)
+            print("userID: \(user.uid)")
             
             print("Was signed in")
         } else {
             print("was not signed in")
-            signIn()
+            loggedIn = false
+//            signIn(email: "", password: "")
         }
     }
     
-    func signIn() {
+    func signIn(email: String, password: String) {
+        
         let auth = Auth.auth()
-        auth.signInAnonymously { [self]result, error in
+        auth.signIn(withEmail: email, password: password) {result, error in
             if let error = error {
-                print("error: \(error)")
+                print("Error loggin in: \(error)")
             } else {
-                print("success")
-                guard let userSignedIn = auth.currentUser else {return}
-                self.user.uid = userSignedIn.uid
-                listenToFireBase(userUID: userSignedIn.uid)
+                guard let userID = result?.user.uid else {return}
+                
+                self.getUserData(userID: userID)
+                self.loggedIn = true
             }
+            
         }
+//        auth.signInAnonymously { [self]result, error in
+//            if let error = error {
+//                print("error: \(error)")
+//            } else {
+//                print("success")
+//                guard let userSignedIn = auth.currentUser else {return}
+//                self.user.uid = userSignedIn.uid
+//                listenToFireBase(userUID: userSignedIn.uid)
+//            }
+//        }
     }
     
     func listenToFireBase(userUID: String) {
@@ -187,7 +213,7 @@ class UserViewModel: ObservableObject {
     
     
     func saveActivityToFireStore(activity: Activity) {
-        guard let userID = self.user.uid else {return}
+        guard let userID = auth.currentUser?.uid else {return}
         do {
             try db.collection("users").document(userID).collection(ACTIVITY).addDocument(from: activity)
             print("Saved activity")
@@ -224,7 +250,8 @@ class UserViewModel: ObservableObject {
     }
     
     func saveOfficeWorkoutToFireStore(workout: OfficeWorkout) {
-        guard let userID = self.user.uid else {return}
+        print(self.user.uid)
+        guard let userID = auth.currentUser?.uid else {return}
         do {
             try db.collection("users").document(userID).collection(WORKOUT).addDocument(from: workout)
         } catch {
@@ -364,13 +391,16 @@ class UserViewModel: ObservableObject {
         print("here now")
         guard let userID = auth.currentUser?.uid else {return}
         if let lastDate = user.lastDateForStreak {
+            var totalStreak = user.totalStreak
             if Calendar.current.isDateInYesterday(lastDate) {
-                let totalStreak = user.totalStreak + 1
-                print("\(totalStreak)")
-                db.collection("users").document(userID).updateData([
-                    "totalStreak" : totalStreak
-                ])
+                totalStreak += 1
+            } else {
+                totalStreak = 1
             }
+            print("\(totalStreak)")
+            db.collection("users").document(userID).updateData([
+                "totalStreak" : totalStreak
+            ])
         }
     }
     
@@ -665,6 +695,47 @@ class UserViewModel: ObservableObject {
             }
         }
     }
+    
+    func createAccount(email: String, password: String) {
+        auth.createUser(withEmail: email, password: password) { result, error in
+            if let error = error {
+                print("Error creating account: \(error)")
+            } else {
+                guard let userID = result?.user.uid else {return}
+                self.saveNewUserInfo(userID: userID)
+            }
+            
+        }
+    }
+    
+    func saveNewUserInfo(userID: String) {
+        let newUser = User(name: "Unknown", imageUrl: nil, lastDateForStreak: Date.now)
+        do {
+            try db.collection("users").document(userID).setData(from: newUser)
+                
+        } catch {
+            print("Error saving new user")
+        }
+    }
+    
+    
+    func getUserData(userID : String) {
+        db.collection("users").document(userID).getDocument() {document, error in
+            if let error = error {
+                print("error getting userInfo: \(error)")
+            } else {
+                do {
+                    let user = try document?.data(as: User.self)
+                    if let user = user {
+                        self.user = user
+                    }
+                } catch {
+                    print("Error getting data")
+                }
+            }
+        }
+    }
+    
 
     
     

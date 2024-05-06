@@ -25,6 +25,7 @@ struct ActivityView: View {
                     .padding(.bottom, 30)
                 MyOfficeWorkoutList()
                     .padding(.bottom, 30)
+                
             }
         
         }
@@ -83,7 +84,7 @@ struct AddActivitySheet: View {
                     HStack {
                         
                         Button (action: {
-                            print("save")
+                            
 //                            let thisCatagory = userData.categories[selectedCategory]
                             if edit {
                                 if let activity = activity {
@@ -267,9 +268,16 @@ struct MyOfficeWorkoutList: View {
             
         }
         .sheet(isPresented: $showSheet, content: {
-            AddOfficeWorkoutSheet(workout: $selectedWorkout, edit: $edit, showsheet: $showSheet)
-                .presentationBackground(.background)
-                .presentationDetents([.medium])
+            if userData.loggedIn {
+                AddOfficeWorkoutSheet(workout: $selectedWorkout, edit: $edit, showsheet: $showSheet)
+                    .presentationBackground(.background)
+                    .presentationDetents([.medium])
+            } else {
+                loginScreen()
+                    .presentationBackground(.background)
+                    .presentationDetents([.medium])
+            }
+//
         })
         .confirmationDialog("Do you want to delete this activity?", isPresented: $showWarning) {
             Button("Delete this activity?", role: .destructive) {
@@ -347,9 +355,16 @@ struct MyActivityList: View {
         .padding(.horizontal, 40)
         .scrollContentBackground(.hidden)
         .sheet(isPresented: $showSheet, content: {
-            AddActivitySheet(activity: $selectedActivity, edit: $edit, showSheet: $showSheet)
-                .presentationBackground(.background)
-                .presentationDetents([.medium])
+            if userData.loggedIn {
+                AddActivitySheet(activity: $selectedActivity, edit: $edit, showSheet: $showSheet)
+                    .presentationBackground(.background)
+                    .presentationDetents([.medium])
+                
+            } else {
+                loginScreen()
+                    .presentationBackground(.background)
+                    .presentationDetents([.medium])
+            }
         })
         .confirmationDialog("Do you want to delete this activity?", isPresented: $showWarning) {
             Button("Delete this activity?", role: .destructive) {
@@ -429,5 +444,31 @@ struct ActivitiesView: View {
         })
         .buttonStyle(AddButton())
         
+    }
+    
+
+}
+
+struct loginScreen : View {
+    @EnvironmentObject var userData : UserViewModel
+    @State var email : String = ""
+    @State var password : String = ""
+    var body: some View {
+        ZStack {
+            AppColors.backgroundColor
+            VStack {
+                TextField("Email", text: self.$email)
+                    .padding()
+                    .background(Color.gray)
+                    .cornerRadius(20.0)
+                SecureField("Password", text: self.$password)
+                    .padding()
+                    .background(Color.gray)
+                    .cornerRadius(20.0)
+                Button("Sign In") {
+                    userData.createAccount(email: email, password: password)
+                }
+            }
+        }
     }
 }
