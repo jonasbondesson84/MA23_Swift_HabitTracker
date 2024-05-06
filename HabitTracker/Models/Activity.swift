@@ -57,7 +57,11 @@ struct ActivityStats: Identifiable, Decodable, Encodable, Hashable {
     var id = UUID()
     var name : String
     var entries : [ActivityEntry]
+    var entriesDay : [ActivityEntry]
+    var entriesWeek : [ActivityEntry]
+    var entriesMonth : [ActivityEntry]
 }
 extension ActivityStats {
-    static let emptyStats = ActivityStats(name: "Running", entries: [ActivityEntry]())
+//    static let emptyStats = ActivityStats(name: "Running", entries: [ActivityEntry]())
+    static let emptyStats = ActivityStats(name: "", entries: [ActivityEntry](), entriesDay: [ActivityEntry](), entriesWeek: [ActivityEntry](), entriesMonth: [ActivityEntry]())
 }
