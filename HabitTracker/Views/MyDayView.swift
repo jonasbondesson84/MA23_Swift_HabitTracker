@@ -274,6 +274,7 @@ struct BadgesView: View {
 
 struct StreakView : View {
     @EnvironmentObject var userData: UserViewModel
+    @State var targetTrack: Double = 0.0
     var body: some View {
         ZStack {
             Circle()
@@ -285,7 +286,7 @@ struct StreakView : View {
                 )
             
             Circle()
-                .trim(from: 0.2, to: 0.5)
+                .trim(from: 0.0, to: 0.2)
                 .rotation(.degrees(54))
                 .stroke(
                     Color.green,
@@ -296,7 +297,7 @@ struct StreakView : View {
                     .foregroundColor(.white)
                     .fontWeight(.bold)
                     .padding(.bottom, 2)
-                Text("12")
+                Text("\(userData.user.totalStreak)")
                     .foregroundColor(.green)
                     .fontWeight(.bold)
                     .padding(.bottom, 2)
@@ -304,11 +305,16 @@ struct StreakView : View {
                     .foregroundColor(.white)
                     .fontWeight(.bold)
                     .padding(.bottom, 2)
-                Text("30")
+                Text("\(userData.user.getTarget())")
                     .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
                     .fontWeight(.bold)
             }
-        }.frame(width: 150, height: 150)
+        }
+        .frame(width: 150, height: 150)
+        .onAppear() {
+            targetTrack = Double(userData.user.totalStreak / userData.user.getTarget())
+            print("\(targetTrack)")
+        }
     }
 }
 
