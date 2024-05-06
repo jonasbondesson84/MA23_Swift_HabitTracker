@@ -73,6 +73,7 @@ class UserViewModel: ObservableObject {
         startListenActivity(userUID: userUID)
         startListenOfficeWorkout(userUID: userUID)
         startListenBadges(userUID: userUID)
+        startListenToUserDetails(userUID: userUID)
 //        getTodaysActivities()
     }
     func startListenBadges(userUID : String) {
@@ -158,6 +159,30 @@ class UserViewModel: ObservableObject {
             }
         }
     }
+    func startListenToUserDetails(userUID: String) {
+        
+        db.collection("users").addSnapshotListener() {snapshot, error in
+            
+            guard let snapshot = snapshot else {return}
+            
+            if let error = error {
+                print("error loading activities: \(error)")
+            } else {
+                for document in snapshot.documents {
+                    if document.documentID == userUID {
+                        do {
+                            self.user = try document.data(as: User.self)
+                        } catch {
+                            print("error loading user")
+                        }
+                    }
+                }
+                   
+                }
+                
+            }
+        }
+    
     
     
     
@@ -272,6 +297,7 @@ class UserViewModel: ObservableObject {
                                                 } else {
                                                     
                                                     self.addToStreak(activity: activity)
+                                                    self.addToTotalStreak()
                                                     
                                                 }
                                             }
@@ -333,6 +359,21 @@ class UserViewModel: ObservableObject {
         
         db.collection("users").document(user.uid).collection(ACTIVITY).document(docID).updateData(["streak": streak, "lastEntry.date": lastEntryDate, "lastEntry.start": lastEntyStart, "lastEntry.end": lastEntryEnd, "todaysEntry.date": FieldValue.delete(), "todaysEntry.start": FieldValue.delete(), "todaysEntry.end": FieldValue.delete(), "doneDate": Date.now])
     }
+    
+    func addToTotalStreak() {
+        print("here now")
+        guard let userID = auth.currentUser?.uid else {return}
+        if let lastDate = user.lastDateForStreak {
+            if Calendar.current.isDateInYesterday(lastDate) {
+                let totalStreak = user.totalStreak + 1
+                print("\(totalStreak)")
+                db.collection("users").document(userID).updateData([
+                    "totalStreak" : totalStreak
+                ])
+            }
+        }
+    }
+    
     
     func calculateActivityTime(activity: Activity)-> String {
         guard let start = activity.lastEntry.start else {return "start error"}
