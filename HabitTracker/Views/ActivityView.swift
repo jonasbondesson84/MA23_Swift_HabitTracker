@@ -36,7 +36,7 @@ struct ActivityView: View {
 struct AddActivitySheet: View {
     @Binding var activity : Activity?
     @Binding var edit: Bool
-    @Binding var showSheet: Bool
+//    @Binding var showSheet: Bool
     @State var name: String = ""
     @State var date: Date = .now
     @State var category : Category = .emptyCategory //= Category(name: "Running", image: "figure.run")
@@ -96,7 +96,7 @@ struct AddActivitySheet: View {
                                 let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
                                 userData.saveActivityToFireStore(activity: newActivity)
                             }
-                                showSheet = false
+                            userData.setShowSheet(showSheet: false)
                             
                         }, label: {
                             Text(edit ? "Update" : "Save")
@@ -107,7 +107,7 @@ struct AddActivitySheet: View {
                         
                         Button (action: {
                             print("cancel")
-                            showSheet = false
+                            userData.setShowSheet(showSheet: false)
                         }, label: {
                             Text("Cancel")
                         })
@@ -142,7 +142,7 @@ struct AddOfficeWorkoutSheet: View {
     @Binding var workout : OfficeWorkout?
     @Binding var edit: Bool
     
-    @Binding var showsheet: Bool
+//    @Binding var showsheet: Bool
     @EnvironmentObject var userData : UserViewModel
     
     @State var name: String = ""
@@ -180,7 +180,7 @@ struct AddOfficeWorkoutSheet: View {
                                 userData.saveOfficeWorkoutToFireStore(workout: newWorkout)
                             }
                             
-                            showsheet = false
+                            userData.setShowSheet(showSheet: false)
                             
                         } label: {
                             Text("Save")
@@ -188,7 +188,7 @@ struct AddOfficeWorkoutSheet: View {
                         .buttonStyle(BorderlessButtonStyle())
                         Spacer()
                         Button {
-                            showsheet = false
+                            userData.setShowSheet(showSheet: false)
                         } label: {
                             Text("Cancel")
                         }
@@ -252,7 +252,7 @@ struct MyOfficeWorkoutList: View {
                     .onTapGesture {
                         selectedWorkout = officeWorkOut
                         edit = true
-                        showSheet = true
+                        userData.setShowSheet(showSheet: true)
                     }
                 }
             .onDelete(perform: { indexSet in
@@ -267,9 +267,9 @@ struct MyOfficeWorkoutList: View {
             .listRowBackground(AppColors.backgroundColor)
             
         }
-        .sheet(isPresented: $showSheet, content: {
+        .sheet(isPresented: $userData.showSheet, content: {
             if userData.loggedIn {
-                AddOfficeWorkoutSheet(workout: $selectedWorkout, edit: $edit, showsheet: $showSheet)
+                AddOfficeWorkoutSheet(workout: $selectedWorkout, edit: $edit)
                     .presentationBackground(.background)
                     .presentationDetents([.medium])
             } else {
@@ -295,7 +295,7 @@ struct MyOfficeWorkoutList: View {
         Button(action: {
             selectedWorkout = nil
             edit = false
-            showSheet = true
+            userData.setShowSheet(showSheet: true)
 //            userData.saveOfficeWorkoutToFireStore(workout: OfficeWorkout(name: "Strech", repeatTimeHours: 1.5))
 
         }, label: {
@@ -338,7 +338,7 @@ struct MyActivityList: View {
                     selectedActivity = activity
                     
                     edit = true
-                    showSheet = true
+                    userData.setShowSheet(showSheet: true)
                 }
             }
             .onDelete(perform: { indexSet in
@@ -356,7 +356,7 @@ struct MyActivityList: View {
         .scrollContentBackground(.hidden)
         .sheet(isPresented: $showSheet, content: {
             if userData.loggedIn {
-                AddActivitySheet(activity: $selectedActivity, edit: $edit, showSheet: $showSheet)
+                AddActivitySheet(activity: $selectedActivity, edit: $edit)
                     .presentationBackground(.background)
                     .presentationDetents([.medium])
                 
@@ -377,7 +377,7 @@ struct MyActivityList: View {
         Button(action: {
             selectedActivity = nil
             edit = false
-            showSheet = true
+            userData.setShowSheet(showSheet: true)
 
         }, label: {
             Label("Add activity", systemImage: "plus")
@@ -453,20 +453,33 @@ struct loginScreen : View {
     @EnvironmentObject var userData : UserViewModel
     @State var email : String = ""
     @State var password : String = ""
+    @State var name : String = ""
     var body: some View {
         ZStack {
             AppColors.backgroundColor
             VStack {
-                TextField("Email", text: self.$email)
+                TextField("Email", text: $email)
+                    .padding(.horizontal, 50)
                     .padding()
                     .background(Color.gray)
                     .cornerRadius(20.0)
-                SecureField("Password", text: self.$password)
+                SecureField("Password", text: $password)
+                    .padding(.horizontal, 50)
                     .padding()
                     .background(Color.gray)
                     .cornerRadius(20.0)
-                Button("Sign In") {
-                    userData.createAccount(email: email, password: password)
+                TextField("Name", text: $name)
+                    .padding(.horizontal, 50)
+                    .padding()
+                    .background(Color.gray)
+                    .cornerRadius(20.0)
+                    .opacity(userData.newAccount ? 1.0 : 0.0)
+                Button(userData.newAccount ? "Create account" : "Sign In") {
+                    if userData.newAccount {
+                        userData.createAccount(email: email, password: password, name: name)
+                    } else {
+                        userData.signIn(email: email, password: password)
+                    }
                 }
             }
         }

@@ -21,6 +21,7 @@ class UserViewModel: ObservableObject {
     @Published var badges = [Badge]()
     @Published var showNewBadge: Bool = false
     @Published var activityStats = [ActivityStats]()
+    @Published var showSheet = false
         
     
     @Published var activities = [Activity]()
@@ -30,6 +31,7 @@ class UserViewModel: ObservableObject {
     @Published var todaysActivities = [Activity]()
     @Published var streak = 0
     @Published var loggedIn = false
+    @Published var newAccount = false
     let db = Firestore.firestore()
     let auth = Auth.auth()
     let ACTIVITY = "activity"
@@ -41,6 +43,9 @@ class UserViewModel: ObservableObject {
 
 //        creatDummyData()
         createCategories()
+    }
+    func setShowSheet(showSheet: Bool) {
+        self.showSheet = showSheet
     }
     
     func signOut() {
@@ -57,6 +62,7 @@ class UserViewModel: ObservableObject {
         if let user = auth.currentUser {
             self.user.uid = user.uid
             loggedIn = true
+            newAccount = false
             listenToFireBase(userUID: user.uid)
             getUserData(userID: user.uid)
             print("userID: \(user.uid)")
@@ -75,14 +81,18 @@ class UserViewModel: ObservableObject {
         auth.signIn(withEmail: email, password: password) {result, error in
             if let error = error {
                 print("Error loggin in: \(error)")
+                self.newAccount = true
             } else {
                 guard let userID = result?.user.uid else {return}
                 
                 self.getUserData(userID: userID)
                 self.loggedIn = true
+                self.showSheet = false
             }
             
         }
+        
+        
 //        auth.signInAnonymously { [self]result, error in
 //            if let error = error {
 //                print("error: \(error)")
@@ -696,20 +706,22 @@ class UserViewModel: ObservableObject {
         }
     }
     
-    func createAccount(email: String, password: String) {
+    func createAccount(email: String, password: String, name: String) {
+        
         auth.createUser(withEmail: email, password: password) { result, error in
             if let error = error {
                 print("Error creating account: \(error)")
             } else {
                 guard let userID = result?.user.uid else {return}
-                self.saveNewUserInfo(userID: userID)
+                self.saveNewUserInfo(userID: userID, name: name)
+                self.showSheet = false
             }
             
         }
     }
     
-    func saveNewUserInfo(userID: String) {
-        let newUser = User(name: "Unknown", imageUrl: nil, lastDateForStreak: Date.now)
+    func saveNewUserInfo(userID: String, name: String) {
+        let newUser = User(name: name, imageUrl: nil, lastDateForStreak: Date.now)
         do {
             try db.collection("users").document(userID).setData(from: newUser)
                 
