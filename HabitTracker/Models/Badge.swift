@@ -14,4 +14,5 @@ struct Badge : Identifiable, Encodable, Decodable {
     var streak: Int
     var category: String
     var image: String
+    var categoryImage: String
 }
