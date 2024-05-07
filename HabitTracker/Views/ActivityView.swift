@@ -36,7 +36,6 @@ struct ActivityView: View {
 struct AddActivitySheet: View {
     @Binding var activity : Activity?
     @Binding var edit: Bool
-//    @Binding var showSheet: Bool
     @State var name: String = ""
     @State var date: Date = .now
     @State var category : Category = .emptyCategory //= Category(name: "Running", image: "figure.run")
@@ -48,74 +47,81 @@ struct AddActivitySheet: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            AppColors.sheetBackgroundColor
+            AppColors.transparent
                 .ignoresSafeArea()
             VStack {
-                Text("Add activity")
+                Text(edit ? "Edit activity" : "Add activity")
                     .font(.system(size: 22))
                     .foregroundColor(.white)
                     .padding(.top, 10)
                 Form {
-                    LabeledContent("Activity name") {
-                        TextField("", text: $name)
-                    }
-                    LabeledContent("Date/Time") {
-                        DatePicker("", selection: $date)
-                    }
-                    LabeledContent("Category") {
-                        Picker("", selection: $category) {
-                            ForEach(userData.categories) { category in
-                                Text("\(category.name)").tag(category as Category)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                    }
-                    LabeledContent("Recurrent") {
-                        Toggle(isOn: $recurrent) {
+                    Section {
+                        LabeledContent("Activity name") {
+                            TextField("", text: $name)
                             
                         }
-                    }
-                    LabeledContent("Recurrent days") {
-                        Stepper(value: $recurrentDays, in :1...7) {
-                            Text("\(recurrentDays)")
-                        }
-                    }
-                    .opacity(recurrent ? 1: 0)
-                    HStack {
                         
-                        Button (action: {
-                            
-//                            let thisCatagory = userData.categories[selectedCategory]
-                            if edit {
-                                if let activity = activity {
-                                    let updatedActivity = Activity(docID: activity.docID, name: name, date: date, repeating: recurrent, category: category, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
-                                    userData.updateActivity(activity: updatedActivity)
+                        LabeledContent("Date/Time") {
+                            DatePicker("", selection: $date)
+                        }
+                        
+                        LabeledContent("Category") {
+                            Picker("", selection: $category) {
+                                ForEach(userData.categories) { category in
+                                    Text("\(category.name)").tag(category as Category)
                                 }
-                            } else {
-                                
-                                let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
-                                userData.saveActivityToFireStore(activity: newActivity)
                             }
-                            userData.setShowSheetFor(Activity: false)
-                            
-                        }, label: {
-                            Text(edit ? "Update" : "Save")
-                        })
-                        .buttonStyle(BorderlessButtonStyle())
+                            .pickerStyle(.menu)
+                        }
                         
-                        Spacer()
+                        LabeledContent("Recurrent") {
+                            Toggle(isOn: $recurrent) {
+                            }
+                        }
                         
-                        Button (action: {
-                            print("cancel")
-                            userData.setShowSheetFor(Activity: false)
-                        }, label: {
-                            Text("Cancel")
-                        })
-                        .buttonStyle(BorderlessButtonStyle())
+//                        LabeledContent("Recurrent days") {
+//                            Stepper(value: $recurrentDays, in :1...7) {
+//                                Text("\(recurrentDays)")
+//                            }
+//                        }
+//                        
+//                        .opacity(recurrent ? 1: 0)
+                        HStack {
+                            Button (action: {
+                                if edit {
+                                    if let activity = activity {
+                                        let updatedActivity = Activity(docID: activity.docID, name: name, date: date, repeating: recurrent, category: category, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
+                                        userData.updateActivity(activity: updatedActivity)
+                                    }
+                                } else {
+                                    
+                                    let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
+                                    userData.saveActivityToFireStore(activity: newActivity)
+                                }
+                                userData.setShowSheetFor(Activity: false)
+                            }, label: {
+                                Text(edit ? "Update" : "Save")
+                            })
+                            .buttonStyle(BorderlessButtonStyle())
+                            Spacer()
+                            Button (action: {
+                                print("cancel")
+                                userData.setShowSheetFor(Activity: false)
+                            }, label: {
+                                Text("Cancel")
+                            })
+                            .buttonStyle(BorderlessButtonStyle())
+                        }
                     }
+                    .listRowBackground(AppColors.textFieldBackgroundColor)
                 }
+                
                 .scrollContentBackground(.hidden)
+                
             }
+            .background(
+                AppColors.gradient
+            )
         }
         .onAppear() {
             print("Edit: \(edit)")
@@ -150,52 +156,56 @@ struct AddOfficeWorkoutSheet: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            AppColors.sheetBackgroundColor
+            AppColors.transparent
                 .ignoresSafeArea()
             VStack {
-                Text("Add Office Workout")
+                Text(edit ? "Edit Office Workout" : "Add Office Workout")
                     .font(.system(size: 22))
                     .foregroundColor(.white)
                     .padding(.top, 10)
                 Form {
-                    LabeledContent("Workout name:") {
-                        TextField("", text: $name)
-                    }
-                    LabeledContent("Repeat every: \(repeatTimeHours) hour") {
-                        Stepper("", value: $repeatTimeHours, in: 1...8, step: 1)
-                    }
-                    
-                    HStack {
-                        Button {
-                            
-                            
-                            if edit {
-                                if let workout = workout {
-                                    let newWorkout = OfficeWorkout(docID: workout.docID, name: name, repeatTimeHours: repeatTimeHours)
-                                    userData.updateOfficeWorkout(workout: newWorkout)
+                    Section {
+                        LabeledContent("Workout name:") {
+                            TextField("", text: $name)
+                        }
+                        LabeledContent("Repeat every: \(repeatTimeHours) hour") {
+                            Stepper("", value: $repeatTimeHours, in: 1...8, step: 1)
+                        }
+                        
+                        HStack {
+                            Button {
+                                
+                                
+                                if edit {
+                                    if let workout = workout {
+                                        let newWorkout = OfficeWorkout(docID: workout.docID, name: name, repeatTimeHours: repeatTimeHours)
+                                        userData.updateOfficeWorkout(workout: newWorkout)
+                                    }
+                                    
+                                } else {
+                                    let newWorkout = OfficeWorkout(name: name, repeatTimeHours: repeatTimeHours)
+                                    userData.saveOfficeWorkoutToFireStore(workout: newWorkout)
                                 }
                                 
-                            } else {
-                                let newWorkout = OfficeWorkout(name: name, repeatTimeHours: repeatTimeHours)
-                                userData.saveOfficeWorkoutToFireStore(workout: newWorkout)
+                                userData.setShowSheetFor(Workout: false)
+                                
+                            } label: {
+                                Text("Save")
                             }
-                            
-                            userData.setShowSheetFor(Workout: false)
-                            
-                        } label: {
-                            Text("Save")
+                            .buttonStyle(BorderlessButtonStyle())
+                            Spacer()
+                            Button {
+                                userData.setShowSheetFor(Workout: false)
+                            } label: {
+                                Text("Cancel")
+                            }
+                            .buttonStyle(BorderlessButtonStyle())
                         }
-                        .buttonStyle(BorderlessButtonStyle())
-                        Spacer()
-                        Button {
-                            userData.setShowSheetFor(Workout: false)
-                        } label: {
-                            Text("Cancel")
-                        }
-                        .buttonStyle(BorderlessButtonStyle())
                     }
+                    .listRowBackground(AppColors.textFieldBackgroundColor)
                 }
                 .scrollContentBackground(.hidden)
+                
                 .onAppear() {
                     if edit {
                         if let workout = workout {
@@ -210,6 +220,9 @@ struct AddOfficeWorkoutSheet: View {
                     }
                 }
             }
+            .background(
+                AppColors.gradient
+            )
         }
     }
 }
@@ -456,32 +469,50 @@ struct loginScreen : View {
     @State var name : String = ""
     var body: some View {
         ZStack {
-            AppColors.backgroundColor
+            AppColors.transparent
+                .ignoresSafeArea()
             VStack {
+                Text("Sign in to continue")
+                    .foregroundColor(.white)
+                    .font(.title)
+                    
+                Text("or create a new account")
+                    .foregroundColor(.white)
+                    .font(.footnote)
+                    .padding(.bottom, 40)
                 TextField("Email", text: $email)
-                    .padding(.horizontal, 50)
+                    .textInputAutocapitalization(.never)
                     .padding()
-                    .background(Color.gray)
+                    .background(AppColors.textFieldBackgroundColor)
                     .cornerRadius(20.0)
                 SecureField("Password", text: $password)
-                    .padding(.horizontal, 50)
+                    
                     .padding()
-                    .background(Color.gray)
+                    .background(AppColors.textFieldBackgroundColor)
                     .cornerRadius(20.0)
                 TextField("Name", text: $name)
-                    .padding(.horizontal, 50)
+                    
                     .padding()
-                    .background(Color.gray)
+                    .background(AppColors.textFieldBackgroundColor)
                     .cornerRadius(20.0)
                     .opacity(userData.newAccount ? 1.0 : 0.0)
-                Button(userData.newAccount ? "Create account" : "Sign In") {
-                    if userData.newAccount {
-                        userData.createAccount(email: email, password: password, name: name)
-                    } else {
-                        userData.signIn(email: email, password: password)
-                    }
+                Button(userData.newAccount ? "Try again" : "Sign In") {
+                    userData.signIn(email: email, password: password)
                 }
+                .foregroundColor(.white)
+                .padding(.vertical, 20)
+                Button("Create account") {
+                    userData.createAccount(email: email, password: password, name: name)
+                }
+                .foregroundColor(.white)
+                .opacity(userData.newAccount ? 1.0 : 0.0)
             }
+            
+            .padding(.horizontal, 30)
         }
+        .scrollContentBackground(.hidden)
+        .background(
+            AppColors.gradient
+        )
     }
 }

@@ -38,6 +38,7 @@ struct ActivityStatsView: View {
                     StatsChart(entries: selectedActivity.entriesDay, name: selectedActivity.name, timePeriod: "Today")
                     StatsChart(entries: selectedActivity.entriesWeek, name: selectedActivity.name, timePeriod: "This week")
                     StatsChart(entries: selectedActivity.entriesMonth, name: selectedActivity.name, timePeriod: "This month")
+                    StatsChart(entries: selectedActivity.entries, name: selectedActivity.name, timePeriod: "Since start")
                 }
                 .tabViewStyle(.page)
 //                Chart(selectedActivity.entries, id: \.date) {entry in
