@@ -27,9 +27,12 @@ struct MyDayView: View {
                     .ignoresSafeArea()
 //                ScrollView {
                     VStack {
-                        
-                        StreakView()
+                        Text("Total streak")
+                            .foregroundColor(.white)
+                            .font(.title)
                             .padding(.top, 50)
+                        StreakView()
+                            
                         
                         BadgesView()
                         
