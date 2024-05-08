@@ -20,6 +20,5 @@ struct AppColors {
     static let buttonColor = Color(red: 1/256, green: 165/256, blue: 126/256)
     static let textFieldBackgroundColor = Color(red: 164/256, green: 222/256, blue: 233/256)
     static let transparent = Color(red: 1/256, green: 1/256, blue: 1/256, opacity: 0.0)
-    
     static let gradient = LinearGradient(gradient: Gradient(colors: [AppColors.cardbackgroundColorEnd, AppColors.backgroundColor]), startPoint: .top, endPoint: .bottom)
 }

@@ -33,7 +33,6 @@ struct MainView: View {
         .tint(AppColors.cardbackgroundColorEnd)
         .onAppear(perform: {
             UITabBar.appearance().unselectedItemTintColor = .gray
-            
             userData.checkSignIn()
         })
     }

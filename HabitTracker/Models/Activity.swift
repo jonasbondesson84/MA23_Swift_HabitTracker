@@ -13,21 +13,12 @@ struct Activity: Identifiable, Decodable, Encodable {
     var id = UUID()
     var name : String
     var date : Date
-    var started: Int = 0
-    var start : Date?
-    var end : Date?
-//    var distance : Double?
-//    var repetitions : Double?
-//    var officeWorkout : Bool
     var repeating : Bool
     var category : Category
-//    var registeredActivities = [ActivityEntry]()
     var streak : Int = 0
     var lastEntry : ActivityEntry
     var todaysEntry: ActivityEntry
     var doneDate: Date?
-    
-//    var entries = [ActivityEntry]()
     
     func formattedDate(date: Date?) -> String {
         let formatter = DateFormatter()
@@ -62,6 +53,5 @@ struct ActivityStats: Identifiable, Decodable, Encodable, Hashable {
     var entriesMonth : [ActivityEntry]
 }
 extension ActivityStats {
-//    static let emptyStats = ActivityStats(name: "Running", entries: [ActivityEntry]())
     static let emptyStats = ActivityStats(name: "placeHolderEmpty", entries: [ActivityEntry](), entriesDay: [ActivityEntry](), entriesWeek: [ActivityEntry](), entriesMonth: [ActivityEntry]())
 }

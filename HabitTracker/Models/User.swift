@@ -12,20 +12,14 @@ class User : ObservableObject, Decodable, Encodable {
     @DocumentID var docIC : String?
     var uid : String?
     var name: String
-//    var sex: Int //0 = Female, 1 = Male, 2 = Other
     var imageUrl : String?
-//    var streak : Int
     var badges = [Badge]()
-//    @Published var activities = [Activity]()
-//    @Published var todaysActivities = [Activity]()
-//    @Published var officeWorkOut = [OfficeWorkout]()
     var totalStreak: Int
     var lastDateForStreak : Date?
     
     init(name: String, imageUrl: String?, badges: [Badge] = [Badge](), lastDateForStreak: Date?) {
         self.name = name
         self.imageUrl = imageUrl
-//        self.streak = streak
         self.badges = badges
         self.totalStreak = 0
         self.lastDateForStreak = lastDateForStreak
@@ -44,13 +38,12 @@ class User : ObservableObject, Decodable, Encodable {
         }
     }
     
-    func getArc() -> Double {
+    func getArcForTotalStreak() -> Double {
         print("TotalStreak: \(Double(self.totalStreak))")
         print("getTarget: \(self.getTarget())")
         let arcNr = Double(self.totalStreak)/Double(self.getTarget())
         print("arc: \(arcNr)")
         return arcNr
     }
-    
-    
+
 }
