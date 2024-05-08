@@ -18,6 +18,7 @@ class UserViewModel: ObservableObject {
     @Published var elapsedTime: TimeInterval = 0
     var timer: Timer?
     @Published var startedActivityID : String?
+    @Published var badges = [Badge]()
         
     
     @Published var activities = [Activity]()
@@ -31,6 +32,7 @@ class UserViewModel: ObservableObject {
     let ACTIVITY = "activity"
     let WORKOUT = "officeWorkout"
     let ACTIVITY_ENTRY = "entry"
+    let BADGES = "badges"
     
     init() {
 
@@ -70,7 +72,29 @@ class UserViewModel: ObservableObject {
         startListenOfficeWorkout(userUID: userUID)
 //        getTodaysActivities()
     }
-    
+    func startListenBadges(userUID : String) {
+//        let db = Firestore.firestore()
+        db.collection("users").document(userUID).collection(BADGES).addSnapshotListener() {snapshot, error in
+        
+            guard let snapshot = snapshot else {return}
+            
+            if let error = error {
+                print("error loading office workout: \(error)")
+            } else {
+                self.officeWorkouts.removeAll()
+                for document in snapshot.documents {
+                    do {
+                        let badge = try document.data(as: Badge.self)
+                        self.badges.append(badge)
+                        
+                    } catch {
+                        print("Error reading from db")
+                    }
+                }
+                
+            }
+        }
+    }
     func startListenOfficeWorkout(userUID : String) {
 //        let db = Firestore.firestore()
         db.collection("users").document(userUID).collection(WORKOUT).addSnapshotListener() {snapshot, error in
@@ -244,6 +268,7 @@ class UserViewModel: ObservableObject {
         } else {
             streak = activity.streak + 1
         }
+        getBadgeFor(activity: activity, streak: streak)
         
         db.collection("users").document(user.uid).collection(ACTIVITY).document(docID).updateData(["streak": streak, "lastEntry.date": lastEntryDate, "lastEntry.start": lastEntyStart, "lastEntry.end": lastEntryEnd, "todaysEntry.date": FieldValue.delete(), "todaysEntry.start": FieldValue.delete(), "todaysEntry.end": FieldValue.delete(), "doneDate": Date.now])
     }
@@ -382,11 +407,45 @@ class UserViewModel: ObservableObject {
         guard let docID = workout.docID else {return}
         db.collection("users").document(userID).collection(WORKOUT).document(docID).updateData(["active": active]) { error in
             if let error = error {
-                print("Error updating workout")
+                print("Error updating workout: \(error)")
             } else {
                 self.setRemindersForOfficeHours()
             }
         }
+    }
+    
+    func getBadgeFor(activity: Activity, streak: Int) {
+        
+        if streak == 5 {
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640")
+            updateDbWith(newBadge: newBadge)
+        } else if streak == 10 {
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640")
+            updateDbWith(newBadge: newBadge)
+        }
+        else if streak == 30 {
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640")
+            updateDbWith(newBadge: newBadge)
+        }
+        else if streak == 100 {
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640")
+            updateDbWith(newBadge: newBadge)
+        }
+        
+    }
+    
+    func updateDbWith(newBadge: Badge) {
+        
+        guard let userID = auth.currentUser?.uid else {return}
+        self.badges.append(newBadge)
+        
+        do {
+            try db.collection("users").document(userID).collection(BADGES).addDocument(from: newBadge)
+            print("Saved Badge")
+        } catch {
+            print("Error writing to Firestore")
+        }
+//        db.collection("users").document(userID).collection(BADGES).addDocument(from: newBadge)
     }
 
         
@@ -406,34 +465,34 @@ class UserViewModel: ObservableObject {
     func creatDummyData() {
 
         
-        var badge = Badge(name: "5 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
-        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
-        user.badges.append(badge)
+//        var badge = Badge(name: "5 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
+//        badge = Badge(name: "10 days", category: "Running", image: "badge_blue")
+//        user.badges.append(badge)
         
     }
     
