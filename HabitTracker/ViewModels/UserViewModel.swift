@@ -10,6 +10,10 @@ import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
 import Firebase
+import PhotosUI
+import FirebaseStorage
+
+
 
 class UserViewModel: ObservableObject {
     @Published var showStart: Bool = false
@@ -35,6 +39,7 @@ class UserViewModel: ObservableObject {
     @Published var streak = 0
     @Published var loggedIn = false
     @Published var newAccount = false
+    
     
     let db = Firestore.firestore()
     let auth = Auth.auth()
@@ -902,14 +907,54 @@ class UserViewModel: ObservableObject {
     }
     
     
-    func update(name: String) {
+    func update(name: String, image : UIImage?) {
         guard let userID = auth.currentUser?.uid else {return}
-        
-        db.collection("users").document(userID).updateData([
-            "name" : name
-        ])
+        if let image = image {
+            guard let imageData = image.jpegData(compressionQuality: 0.5) else {
+                            print("Failed to convert image to data")
+                            return
+                        }
+
+                        let storage = Storage.storage()
+                        let storageRef = storage.reference()
+                        let imageName = generateFileName()
+                        let imageRef = storageRef.child("\(userID)/\(imageName).jpg")
+
+                        imageRef.putData(imageData, metadata: nil) { metadata, error in
+                            if let error = error {
+                                print("Error uploading image: \(error.localizedDescription)")
+                                return
+                            }
+                            
+                            imageRef.downloadURL { url, error in
+                                if let error = error {
+                                    print("Error fetching download URL: \(error.localizedDescription)")
+                                    return
+                                }
+                                
+                                if let url = url {
+                                    print("Download URL: \(url)")
+                                    // Spara ner URL:en för bilden för senare användning
+                                    let imageURL: String = url.absoluteString
+                                    self.db.collection("users").document(userID).updateData([
+                                        "name": name,
+                                        "imageUrl": imageURL])
+                                }
+                            }
+                        }
+        } else {
+            
+            db.collection("users").document(userID).updateData([
+                "name" : name
+            ])
+        }
     }
-    
+    func generateFileName() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd_HHmmss"
+        let dateString = formatter.string(from: Date())
+        return "image_\(dateString)"
+    }
     
 
     func createCategories() {
@@ -962,6 +1007,8 @@ class UserViewModel: ObservableObject {
 //        user.badges.append(badge)
         
     }
-    
+    func getImages() {
+        
+    }
     
 }
