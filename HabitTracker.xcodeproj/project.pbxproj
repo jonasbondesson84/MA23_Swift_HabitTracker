@@ -21,7 +21,6 @@
 		0C0551462BDBF0A300902810 /* MyDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0551452BDBF0A300902810 /* MyDayView.swift */; };
 		0C0551482BDBF0B200902810 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0551472BDBF0B200902810 /* ActivityView.swift */; };
 		0C05514A2BDBF0C600902810 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0551492BDBF0C600902810 /* AccountView.swift */; };
-		0C05514C2BDBF0CE00902810 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C05514B2BDBF0CE00902810 /* CalendarView.swift */; };
 		0C05514E2BDBF0EC00902810 /* UserViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C05514D2BDBF0EC00902810 /* UserViewModel.swift */; };
 		0C0551502BDBF10200902810 /* Activity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C05514F2BDBF10200902810 /* Activity.swift */; };
 		0C0551522BDBF10B00902810 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0551512BDBF10B00902810 /* Category.swift */; };
@@ -66,7 +65,6 @@
 		0C0551452BDBF0A300902810 /* MyDayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyDayView.swift; sourceTree = "<group>"; };
 		0C0551472BDBF0B200902810 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		0C0551492BDBF0C600902810 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
-		0C05514B2BDBF0CE00902810 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		0C05514D2BDBF0EC00902810 /* UserViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserViewModel.swift; sourceTree = "<group>"; };
 		0C05514F2BDBF10200902810 /* Activity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Activity.swift; sourceTree = "<group>"; };
 		0C0551512BDBF10B00902810 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
@@ -175,7 +173,6 @@
 				0C0551452BDBF0A300902810 /* MyDayView.swift */,
 				0C0551472BDBF0B200902810 /* ActivityView.swift */,
 				0C0551492BDBF0C600902810 /* AccountView.swift */,
-				0C05514B2BDBF0CE00902810 /* CalendarView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -347,7 +344,6 @@
 				0C05515A2BDBF20100902810 /* AppColors.swift in Sources */,
 				0C0551562BDBF11D00902810 /* OfficeWorkout.swift in Sources */,
 				0C05515C2BEDF30F00902810 /* ActivityStatsView.swift in Sources */,
-				0C05514C2BDBF0CE00902810 /* CalendarView.swift in Sources */,
 				0C0551102BDBEEE100902810 /* MainView.swift in Sources */,
 				0C05510E2BDBEEE100902810 /* HabitTrackerApp.swift in Sources */,
 				0C0551522BDBF10B00902810 /* Category.swift in Sources */,

@@ -12,8 +12,6 @@ struct ActivityStatsView: View {
     
     @EnvironmentObject var userData : UserViewModel
     @State var selectedActivity: ActivityStats = .emptyStats
-    
-//    @State var selectedActivity = 0
     @State var activityName : String = ""
     
     var body: some View {
@@ -24,19 +22,13 @@ struct ActivityStatsView: View {
                 Text("Statistics about your activities")
                     .foregroundColor(.white)
                     .font(.title)
-                
                 Picker( selection: $selectedActivity, label: Text("Select an activity")) {
                     Text("Select an activity").tag("Select an activity")
                     ForEach(userData.activityStats) { activity in
                         Text("\(activity.name)").tag(activity as ActivityStats)
-                        
                     }
                 }
-                
                 TabView {
-//                    Text("First")
-//                    Text("Second")
-//                    Text("Third")
                     StatsChart(entries: selectedActivity.entriesDay, name: selectedActivity.name, timePeriod: "Today")
                     StatsChart(entries: selectedActivity.entriesWeek, name: selectedActivity.name, timePeriod: "This week")
                     StatsChart(entries: selectedActivity.entriesMonth, name: selectedActivity.name, timePeriod: "This month")
@@ -44,46 +36,11 @@ struct ActivityStatsView: View {
                 }
                 .tabViewStyle(.page)
                 .opacity(selectedActivity.name == "placeHolderEmpty" ? 0.0 : 1.0)
-//                Chart(selectedActivity.entries, id: \.date) {entry in
-//                    if let totalTime = entry.totalTime {
-//                        if let date = entry.date {
-//                            BarMark(
-//                                x: .value("Date", date, unit: .day),
-//                                y: .value("Time", totalTime)//, width: 20
-//                            )
-//                            .cornerRadius(10)
-//                            
-//                        }
-//                    }
-//                    
-//                }
                 .frame(height: 300)
                 .padding(50)
-                //            ForEach(userData.activityStats) {stats in
-                //
-                //                    Text(stats.name)
-                //                    Chart(stats.entries, id: \.date) {entry in
-                //                        //                    if let totalTime = entry.totalTime {
-                //                        if let date = entry.date {
-                //                            BarMark(
-                //                                x: .value("Date", date),
-                //                                y: .value("Time", 5)
-                //                            )
-                //                        }
-                //                    }
-                //                    //                }
-                //                }
-                //            }
             }
         }
-        .onAppear(){
-//            userData.getActivityStats()
-//            guard let selectedActivity = userData.activityStats.first else {return}
-            print("got it")
-            
-        }
     }
-    
 }
 
 struct StatsChart : View {
@@ -105,20 +62,15 @@ struct StatsChart : View {
                         )
                         .cornerRadius(10)
                         .foregroundStyle(AppColors.gradient)
-                        
-                        
                     }
                 }
-                
             }
-            
             .chartXAxis {AxisMarks(values: .automatic) {
                 AxisValueLabel()
                     .foregroundStyle(.white)
             }
             }
             .chartYAxis {AxisMarks(values: .automatic) {
-                
                 AxisValueLabel()
                     .foregroundStyle(.white)
             }

@@ -18,16 +18,3 @@ extension Category {
     static let emptyCategory = Category(name: "Running", image: "figure.walk")
 }
 
-//enum CategoryEnum : Hashable{
-//    case category(Category)
-//    
-//    static var allCategories: [CategoryEnum] {
-//        return [
-//            .category(Category(name: "Running", image: "figure.run")),
-//            .category(Category(name: "Swimming", image: "figure.pool.swim")),
-//            .category(Category(name: "Cycling", image: "figure.outdoor.cycle")),
-//            .category(Category(name: "Walking", image: "figure.walk"))
-//            // Lägg till fler kategorier efter behov
-//        ]
-//    }
-//}

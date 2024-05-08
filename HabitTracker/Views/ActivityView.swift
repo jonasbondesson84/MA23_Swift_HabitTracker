@@ -9,12 +9,7 @@ import SwiftUI
 
 struct ActivityView: View {
     @EnvironmentObject var userData: UserViewModel
-//    @State var showAddActivity = false
     @State var showAddOfficeWorkout = false
-//    @State var edit: Bool = false
-    
-    
-    
     
     var body: some View {
         ZStack {
@@ -25,11 +20,8 @@ struct ActivityView: View {
                     .padding(.bottom, 30)
                 MyOfficeWorkoutList()
                     .padding(.bottom, 30)
-                
             }
-        
         }
-        
     }
 }
 
@@ -42,7 +34,6 @@ struct AddActivitySheet: View {
     @State var selectedCategory = 0
     @State var recurrent : Bool = true
     @State var recurrentDays: Int = 1
-    
     @EnvironmentObject var userData : UserViewModel
     
     var body: some View {
@@ -58,13 +49,10 @@ struct AddActivitySheet: View {
                     Section {
                         LabeledContent("Activity name") {
                             TextField("", text: $name)
-                            
                         }
-                        
                         LabeledContent("Date/Time") {
                             DatePicker("", selection: $date)
                         }
-                        
                         LabeledContent("Category") {
                             Picker("", selection: $category) {
                                 Text("Select category")
@@ -74,19 +62,10 @@ struct AddActivitySheet: View {
                             }
                             .pickerStyle(.menu)
                         }
-                        
                         LabeledContent("Recurrent") {
                             Toggle(isOn: $recurrent) {
                             }
                         }
-                        
-//                        LabeledContent("Recurrent days") {
-//                            Stepper(value: $recurrentDays, in :1...7) {
-//                                Text("\(recurrentDays)")
-//                            }
-//                        }
-//                        
-//                        .opacity(recurrent ? 1: 0)
                         HStack {
                             Button (action: {
                                 if edit {
@@ -95,7 +74,6 @@ struct AddActivitySheet: View {
                                         userData.updateActivity(activity: updatedActivity)
                                     }
                                 } else {
-                                    
                                     let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
                                     userData.saveActivityToFireStore(activity: newActivity)
                                 }
@@ -107,7 +85,6 @@ struct AddActivitySheet: View {
                             .disabled(name.isEmpty || category == .emptyCategory)
                             Spacer()
                             Button (action: {
-                                print("cancel")
                                 userData.setShowSheetFor(Activity: false)
                             }, label: {
                                 Text("Cancel")
@@ -117,18 +94,14 @@ struct AddActivitySheet: View {
                     }
                     .listRowBackground(AppColors.textFieldBackgroundColor)
                 }
-                
                 .scrollContentBackground(.hidden)
-                
             }
             .background(
                 AppColors.gradient
             )
         }
         .onAppear() {
-            print("Edit: \(edit)")
             if edit {
-                
                 if let activity = activity {
                     name = activity.name
                     date = activity.date
@@ -141,7 +114,6 @@ struct AddActivitySheet: View {
                 category = .emptyCategory
                 recurrent = true
             }
-            
         }
     }
 }
@@ -149,10 +121,7 @@ struct AddActivitySheet: View {
 struct AddOfficeWorkoutSheet: View {
     @Binding var workout : OfficeWorkout?
     @Binding var edit: Bool
-    
-//    @Binding var showsheet: Bool
     @EnvironmentObject var userData : UserViewModel
-    
     @State var name: String = ""
     @State var repeatTimeHours: Int = 1
     
@@ -173,24 +142,18 @@ struct AddOfficeWorkoutSheet: View {
                         LabeledContent("Repeat every: \(repeatTimeHours) hour") {
                             Stepper("", value: $repeatTimeHours, in: 1...8, step: 1)
                         }
-                        
                         HStack {
                             Button {
-                                
-                                
                                 if edit {
                                     if let workout = workout {
                                         let newWorkout = OfficeWorkout(docID: workout.docID, name: name, repeatTimeHours: repeatTimeHours)
                                         userData.updateOfficeWorkout(workout: newWorkout)
                                     }
-                                    
                                 } else {
                                     let newWorkout = OfficeWorkout(name: name, repeatTimeHours: repeatTimeHours)
                                     userData.saveOfficeWorkoutToFireStore(workout: newWorkout)
                                 }
-                                
                                 userData.setShowSheetFor(Workout: false)
-                                
                             } label: {
                                 Text("Save")
                             }
@@ -208,18 +171,15 @@ struct AddOfficeWorkoutSheet: View {
                     .listRowBackground(AppColors.textFieldBackgroundColor)
                 }
                 .scrollContentBackground(.hidden)
-                
                 .onAppear() {
                     if edit {
                         if let workout = workout {
                             name = workout.name
                             repeatTimeHours = workout.repeatTimeHours
-                            
                         } else {
                             name = ""
                             repeatTimeHours = 1
                         }
-                        print("edit")
                     }
                 }
             }
@@ -238,7 +198,6 @@ struct MyOfficeWorkoutList: View {
     @State var index : IndexSet?
     @State var showWarning = false
     
-    
     var body: some View {
         Text("My Office Workouts")
             .foregroundColor(.white)
@@ -247,41 +206,33 @@ struct MyOfficeWorkoutList: View {
             .frame(maxWidth: .infinity,alignment: .leading)
             .padding(.leading, 30)
             .fontWeight(.bold)
-        
         List {
-            
             ForEach (userData.officeWorkouts) {officeWorkOut in
-                
-                    HStack {
-                        Text(officeWorkOut.name)
-                            .foregroundColor(.white)
-                        Spacer()
-                        Image(systemName: officeWorkOut.active ? "star.fill": "star")
-                            .foregroundColor(officeWorkOut.active ? .yellow: .white)
-                            .onTapGesture {
-                                userData.updateWorkoutActiv(workout: officeWorkOut, active: !officeWorkOut.active)
-                            }
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.white)
-                        
-                    }
-                    .onTapGesture {
-                        selectedWorkout = officeWorkOut
-                        edit = true
-                        userData.setShowSheetFor(Workout: true)
-                    }
+                HStack {
+                    Text(officeWorkOut.name)
+                        .foregroundColor(.white)
+                    Spacer()
+                    Image(systemName: officeWorkOut.active ? "star.fill": "star")
+                        .foregroundColor(officeWorkOut.active ? .yellow: .white)
+                        .onTapGesture {
+                            userData.updateWorkoutActiv(workout: officeWorkOut, active: !officeWorkOut.active)
+                        }
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.white)
                 }
+                .onTapGesture {
+                    selectedWorkout = officeWorkOut
+                    edit = true
+                    userData.setShowSheetFor(Workout: true)
+                }
+            }
             .onDelete(perform: { indexSet in
                 index = indexSet
                 showWarning = true
-                
             })
-            
-            
             .padding(.vertical, 2)
             .listRowInsets(.init())
             .listRowBackground(AppColors.backgroundColor)
-            
         }
         .sheet(isPresented: $userData.showSheetWorkout, content: {
             if userData.loggedIn {
@@ -293,7 +244,6 @@ struct MyOfficeWorkoutList: View {
                     .presentationBackground(.background)
                     .presentationDetents([.medium])
             }
-//
         })
         .confirmationDialog("Do you want to delete this activity?", isPresented: $showWarning) {
             Button("Delete this activity?", role: .destructive) {
@@ -301,26 +251,20 @@ struct MyOfficeWorkoutList: View {
             }
         } message: {
             Text("You cannot undo this action")
-          }
+        }
         .padding(.horizontal, 40)
         .scrollContentBackground(.hidden)
         .listStyle(.plain)
-        
-        
-        
         Button(action: {
             selectedWorkout = nil
             edit = false
             userData.setShowSheetFor(Workout: true)
-//            userData.saveOfficeWorkoutToFireStore(workout: OfficeWorkout(name: "Strech", repeatTimeHours: 1.5))
-
         }, label: {
             Label("Add Office Workout", systemImage: "plus")
         })
         .buttonStyle(AddButton())
         .padding(.horizontal, 40)
     }
-    
 }
 
 struct MyActivityList: View {
@@ -331,7 +275,6 @@ struct MyActivityList: View {
     @State var showWarning = false
     @State var index : IndexSet?
     
-    
     var body: some View {
         Text("My Activities")
             .foregroundColor(.white)
@@ -340,13 +283,11 @@ struct MyActivityList: View {
             .frame(maxWidth: .infinity,alignment: .leading)
             .padding(.leading, 30)
             .fontWeight(.bold)
-        
         List {
             ForEach (userData.activities) { activity in
                 HStack {
                     Text(activity.name)
                         .foregroundColor(.white)
-                    
                     Spacer()
                     if activity.repeating {
                         Image(systemName: "arrow.circlepath")
@@ -357,7 +298,6 @@ struct MyActivityList: View {
                 }
                 .onTapGesture {
                     selectedActivity = activity
-                    
                     edit = true
                     userData.setShowSheetFor(Activity: true)
                 }
@@ -365,12 +305,10 @@ struct MyActivityList: View {
             .onDelete(perform: { indexSet in
                 index = indexSet
                 showWarning = true
-                
             })
             .padding(.vertical, 2)
             .listRowInsets(.init())
             .listRowBackground(AppColors.backgroundColor)
-            
         }
         .listStyle(.plain)
         .padding(.horizontal, 40)
@@ -380,7 +318,6 @@ struct MyActivityList: View {
                 AddActivitySheet(activity: $selectedActivity, edit: $edit)
                     .presentationBackground(.background)
                     .presentationDetents([.medium])
-                
             } else {
                 loginScreen()
                     .presentationBackground(.background)
@@ -393,47 +330,29 @@ struct MyActivityList: View {
             }
         } message: {
             Text("You cannot undo this action")
-          }
-        
+        }
         Button(action: {
             selectedActivity = nil
             edit = false
             userData.setShowSheetFor(Activity: true)
-
         }, label: {
             Label("Add activity", systemImage: "plus")
         })
         .buttonStyle(AddButton())
         .padding(.horizontal, 40)
-        
     }
-        
 }
-
-
 
 struct AddButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-        
             .frame(maxWidth: .infinity)
-            
             .frame(height: 40)
-            
             .background(AppColors.buttonColor)
             .foregroundStyle(.white)
             .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
-
-#Preview {
-    ActivityView()
-        .environmentObject(UserViewModel())
-}
-
-
-
-
 
 struct ActivitiesView: View {
     @EnvironmentObject var user: UserViewModel
@@ -464,10 +383,7 @@ struct ActivitiesView: View {
             Label("Add activity", systemImage: "plus.app")
         })
         .buttonStyle(AddButton())
-        
     }
-    
-
 }
 
 struct loginScreen : View {
@@ -483,7 +399,6 @@ struct loginScreen : View {
                 Text("Sign in to continue")
                     .foregroundColor(.white)
                     .font(.title)
-                    
                 Text("or create a new account")
                     .foregroundColor(.white)
                     .font(.footnote)
@@ -494,12 +409,10 @@ struct loginScreen : View {
                     .background(AppColors.textFieldBackgroundColor)
                     .cornerRadius(20.0)
                 SecureField("Password", text: $password)
-                    
                     .padding()
                     .background(AppColors.textFieldBackgroundColor)
                     .cornerRadius(20.0)
                 TextField("Name", text: $name)
-                    
                     .padding()
                     .background(AppColors.textFieldBackgroundColor)
                     .cornerRadius(20.0)
@@ -515,7 +428,6 @@ struct loginScreen : View {
                 .foregroundColor(.white)
                 .opacity(userData.newAccount ? 1.0 : 0.0)
             }
-            
             .padding(.horizontal, 30)
         }
         .scrollContentBackground(.hidden)
@@ -523,4 +435,9 @@ struct loginScreen : View {
             AppColors.gradient
         )
     }
+}
+
+#Preview {
+    ActivityView()
+        .environmentObject(UserViewModel())
 }
