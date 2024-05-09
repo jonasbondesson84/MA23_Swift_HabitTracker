@@ -19,6 +19,7 @@ class UserViewModel: ObservableObject {
     var timer: Timer?
     @Published var startedActivityID : String?
     @Published var badges = [Badge]()
+    @Published var showNewBadge: Bool = false
         
     
     @Published var activities = [Activity]()
@@ -70,6 +71,7 @@ class UserViewModel: ObservableObject {
     func listenToFireBase(userUID: String) {
         startListenActivity(userUID: userUID)
         startListenOfficeWorkout(userUID: userUID)
+        startListenBadges(userUID: userUID)
 //        getTodaysActivities()
     }
     func startListenBadges(userUID : String) {
@@ -86,11 +88,14 @@ class UserViewModel: ObservableObject {
                     do {
                         let badge = try document.data(as: Badge.self)
                         self.badges.append(badge)
+                        self.badges.sort(by: {$0.streak < $1.streak})
                         
                     } catch {
                         print("Error reading from db")
                     }
+                    
                 }
+                
                 
             }
         }
@@ -357,6 +362,7 @@ class UserViewModel: ObservableObject {
     func stopTimer() {
         timer?.invalidate()
         timer = nil
+        elapsedTime = 0
     }
     
     func setRemindersForOfficeHours() {
@@ -438,6 +444,7 @@ class UserViewModel: ObservableObject {
         
         guard let userID = auth.currentUser?.uid else {return}
         self.badges.append(newBadge)
+        showNewBadge = true
         
         do {
             try db.collection("users").document(userID).collection(BADGES).addDocument(from: newBadge)

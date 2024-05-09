@@ -45,6 +45,9 @@ struct MyDayView: View {
         .onAppear() {
             userData.updateTodaysActivities()
         }
+        .alert("You got a new badge",isPresented: $userData.showNewBadge) {
+            Button("ok", role: .cancel) {}
+        }
         
             
 //        }
@@ -252,6 +255,10 @@ struct BadgesView: View {
                         Text(badge.name)
                             .font(.footnote)
                             .offset(y: -2)
+                        Text("\(badge.streak)")
+                            .font(.footnote)
+                            .offset(y: 15)
+                        
                     }
                 }
             }
