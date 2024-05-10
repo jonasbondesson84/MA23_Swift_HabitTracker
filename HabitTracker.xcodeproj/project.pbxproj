@@ -29,6 +29,7 @@
 		0C0551562BDBF11D00902810 /* OfficeWorkout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0551552BDBF11D00902810 /* OfficeWorkout.swift */; };
 		0C0551582BDBF12600902810 /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0551572BDBF12600902810 /* Badge.swift */; };
 		0C05515A2BDBF20100902810 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0551592BDBF20100902810 /* AppColors.swift */; };
+		0C05515C2BEDF30F00902810 /* ActivityStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C05515B2BEDF30F00902810 /* ActivityStatsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +72,7 @@
 		0C0551552BDBF11D00902810 /* OfficeWorkout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfficeWorkout.swift; sourceTree = "<group>"; };
 		0C0551572BDBF12600902810 /* Badge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
 		0C0551592BDBF20100902810 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		0C05515B2BEDF30F00902810 /* ActivityStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityStatsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,6 +167,7 @@
 			isa = PBXGroup;
 			children = (
 				0C05510F2BDBEEE100902810 /* MainView.swift */,
+				0C05515B2BEDF30F00902810 /* ActivityStatsView.swift */,
 				0C0551452BDBF0A300902810 /* MyDayView.swift */,
 				0C0551472BDBF0B200902810 /* ActivityView.swift */,
 				0C0551492BDBF0C600902810 /* AccountView.swift */,
@@ -337,6 +340,7 @@
 				0C0551482BDBF0B200902810 /* ActivityView.swift in Sources */,
 				0C05515A2BDBF20100902810 /* AppColors.swift in Sources */,
 				0C0551562BDBF11D00902810 /* OfficeWorkout.swift in Sources */,
+				0C05515C2BEDF30F00902810 /* ActivityStatsView.swift in Sources */,
 				0C05514C2BDBF0CE00902810 /* CalendarView.swift in Sources */,
 				0C0551102BDBEEE100902810 /* MainView.swift in Sources */,
 				0C05510E2BDBEEE100902810 /* HabitTrackerApp.swift in Sources */,

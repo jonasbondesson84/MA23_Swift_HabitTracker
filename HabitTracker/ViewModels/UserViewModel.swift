@@ -20,6 +20,7 @@ class UserViewModel: ObservableObject {
     @Published var startedActivityID : String?
     @Published var badges = [Badge]()
     @Published var showNewBadge: Bool = false
+    @Published var activityStats = [ActivityStats]()
         
     
     @Published var activities = [Activity]()
@@ -144,12 +145,14 @@ class UserViewModel: ObservableObject {
                             self.todaysActivities.append(activity)
                             
                         }
-                        self.activities.append(activity) //------------------------------------------
+                        self.activities.append(activity)
+                        //------------------------------------------
 //                        self.categories.removeAll()
                     } catch {
                         print("Error reading from db")
                     }
                 }
+                self.getActivityStats()
             }
         }
     }
@@ -181,7 +184,7 @@ class UserViewModel: ObservableObject {
         self.startTimer()
         startedActivityID = activity.docID
         do {
-            try self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).collection(self.ACTIVITY_ENTRY).addDocument(from: ActivityEntry(date: Date.now, start: Date.now))
+            try self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).collection(self.ACTIVITY_ENTRY).addDocument(from: ActivityEntry(date: Date.now, start: Date.now, actitivyID: activityID))
 //            self.updateActivityWith(lastEntry: activity)
             self.db.collection("users").document(userID).collection(self.ACTIVITY).document(activityID).updateData(["todaysEntry.date": Date.now, "todaysEntry.start" : Date.now])
         } catch {
@@ -345,7 +348,7 @@ class UserViewModel: ObservableObject {
 //                        self.activities.append(activity) //------------------------------------------
 //                        self.categories.removeAll()
                     } catch {
-                        print("Error reading from db")
+                        print("Error reading from db activity")
                     }
                 }
             }
@@ -455,7 +458,120 @@ class UserViewModel: ObservableObject {
 //        db.collection("users").document(userID).collection(BADGES).addDocument(from: newBadge)
     }
 
-        
+//    func getAllActivityEntries() {
+//        guard let userID = auth.currentUser?.uid else {return}
+//        
+//        for activity in activities {
+//            if let docID = activity.docID {
+//                do {
+//                    db.collection("users").document(userID).collection(ACTIVITY).document(docID).collection(ACTIVITY_ENTRY).getDocuments() {snapshot, error in
+//                        guard let snapshot = snapshot else {return}
+//                        
+//                        for document in snapshot.documents {
+//                            let entry = try document.data(as: ActivityEntry.self)
+//                            
+//                        }
+//                        
+//                    }
+//                    
+//                } catch {
+//                    print("Error")
+//                }
+//            }
+//        }
+//    }
+    
+//    func getActivityEntries(docID: String)-> [ActivityEntry] {
+//        
+//        var list = [ActivityEntry]()
+//        guard let userID = auth.currentUser?.uid else {return [ActivityEntry]()}
+//        
+//        db.collection("users").document(userID).collection(ACTIVITY).document(docID).collection(ACTIVITY_ENTRY).getDocuments() { snapshot, error in
+//            
+//            guard let snapshot = snapshot else {return}
+//            do {
+//                if let error = error {
+//                    print("error getting activityEntry")
+//                } else {
+//                    for document in snapshot.documents {
+//                        let entry = try document.data(as: ActivityEntry.self)
+//                        list.append(entry)
+//                    }
+//                    
+//                }
+//                return
+//            } catch {
+//                print("Error")
+//            }
+//            
+//        }
+//        return list
+//    }
+      
+//    func getActivityEntries(docID: String, completion: @escaping ([ActivityEntry]) -> Void) {
+//        var list = [ActivityEntry]()
+//        guard let userID = auth.currentUser?.uid else {
+//            completion([])
+//            return
+//        }
+//        
+//        db.collection("users").document(userID).collection(ACTIVITY).document(docID).collection(ACTIVITY_ENTRY).getDocuments() { snapshot, error in
+//            guard let snapshot = snapshot else {
+//                completion([])
+//                return
+//            }
+//            
+//            do {
+//                if let error = error {
+//                    print("Error getting activityEntry: \(error)")
+//                    completion([])
+//                } else {
+//                    for document in snapshot.documents {
+//                        let entry = try document.data(as: ActivityEntry.self)
+//                        list.append(entry)
+//                        
+//                    }
+//                    completion(list)
+//                }
+//            } catch {
+//                print("Error parsing data: \(error)")
+//                completion([])
+//            }
+//        }
+//    }
+    
+    func getActivityStats() {
+        guard let userID = auth.currentUser?.uid else {return}
+        activityStats.removeAll()
+        for activity in activities {
+            var list = [ActivityEntry]()
+            if let docID = activity.docID {
+                db.collection("users").document(userID).collection(ACTIVITY).document(docID).collection(ACTIVITY_ENTRY).getDocuments() { snapshot, error in
+                
+                            guard let snapshot = snapshot else {return}
+                            do {
+                                if let error = error {
+                                    print("error getting activityEntry \(error)")
+                                } else {
+                                    for document in snapshot.documents {
+                                        let entry = try document.data(as: ActivityEntry.self)
+                                        list.append(entry)
+                                    }
+                                    let stats = ActivityStats(name: activity.name, entries: list)
+                                    self.activityStats.append(stats)
+                                    print("\(self.activityStats.count) \(stats.name)")
+                
+                                }
+                                
+                            } catch {
+                                print("Error")
+                            }
+                
+                        }
+            }
+        }
+    }
+
     
     
 
