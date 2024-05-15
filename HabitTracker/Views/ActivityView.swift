@@ -343,7 +343,12 @@ struct MyActivityList: View {
                 HStack {
                     Text(activity.name)
                         .foregroundColor(.white)
+                    
                     Spacer()
+                    if activity.repeating {
+                        Image(systemName: "arrow.circlepath")
+                            .foregroundColor(.white)
+                    }
                     Image(systemName: "chevron.right")
                         .foregroundColor(.white)
                 }

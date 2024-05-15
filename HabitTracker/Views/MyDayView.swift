@@ -225,21 +225,63 @@ struct TodaysActivities: View {
                     Image(systemName: "clock")
                         .padding(.leading, 40)
 //                    if activity.todaysEntry.start != nil && activity.todaysEntry.end != nil {
-                    if let date = activity.lastEntry.end {
+                    
+                    if let date = activity.lastEntry.date {
                         if Calendar.current.isDateInToday(date) {
-                            Text("\(userData.calculateActivityTime(activity: activity))")
-                                .multilineTextAlignment(.center)
-                                .font(.system(size: 18))
+                            if let endDate = activity.lastEntry.end {
+                                Text("\(userData.calculateActivityTime(activity: activity))")
+                                                                                            .multilineTextAlignment(.center)
+                                                                                            .font(.system(size: 18))
+                            }
+                        } else if let startDate = activity.todaysEntry.start {
+                            Text("\(userData.showTimerAsTime(seconds: Double(userData.elapsedTime)))")
+                                                            .multilineTextAlignment(.center)
+                                                            .font(.system(size: 18))
                         } else {
-                            Text("\(userData.showTimerAsTime(seconds: Double(userData.elapsedTime)))")
-                                .multilineTextAlignment(.center)
-                                .font(.system(size: 18))
+                            Text("\(userData.showTimerAsTime(seconds: 0.0))")
+                                                            .multilineTextAlignment(.center)
+                                                            .font(.system(size: 18))
                         }
+            
+//                        if let endDate = activity.lastEntry.end {
+//                            Text("\(userData.calculateActivityTime(activity: activity))")
+//                                                            .multilineTextAlignment(.center)
+//                                                            .font(.system(size: 18))
+//                        } else if let startDate = activity.lastEntry.start {
+//                            
+//                        } else {
+//                            
+//                        }
                     } else {
-                            Text("\(userData.showTimerAsTime(seconds: Double(userData.elapsedTime)))")
-                                .multilineTextAlignment(.center)
-                                .font(.system(size: 18))
-                        }
+                        Text("\(userData.showTimerAsTime(seconds: 0.0))")
+                                                        .multilineTextAlignment(.center)
+                                                        .font(.system(size: 18))
+                    }
+                    
+                    
+//                    if let date = activity.lastEntry.end {
+//                        if Calendar.current.isDateInToday(date) {
+//                            Text("\(userData.calculateActivityTime(activity: activity))")
+//                                .multilineTextAlignment(.center)
+//                                .font(.system(size: 18))
+//                        } else {
+//                            Text("\(userData.showTimerAsTime(seconds: Double(userData.elapsedTime)))")
+//                                .multilineTextAlignment(.center)
+//                                .font(.system(size: 18))
+//                        }
+//                    } else {
+//                        if let start = activity.lastEntry.start {
+//                            if Calendar.current.isDateInToday(start) {
+//                                Text("\(userData.showTimerAsTime(seconds: Double(userData.elapsedTime)))")
+//                                    .multilineTextAlignment(.center)
+//                                    .font(.system(size: 18))
+//                            }
+//                        } else {
+//                            Text("\(userData.showTimerAsTime(seconds: 0.0))")
+//                                .multilineTextAlignment(.center)
+//                                .font(.system(size: 18))
+//                        }
+//                        }
                     
                     
                     Spacer()
@@ -269,8 +311,11 @@ struct BadgesView: View {
                         Image(systemName: badge.categoryImage)
                             .offset(y: -15)
                         Text(badge.name)
+                            .padding(.leading, 2)
                             .font(.footnote)
                             .offset(y: -2)
+                            .frame(width: 60, height: 20)
+                            .truncationMode(.tail)
                         Text("\(badge.streak)")
                             .font(.footnote)
                             .offset(y: 15)

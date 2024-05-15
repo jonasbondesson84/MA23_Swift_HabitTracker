@@ -15,7 +15,7 @@ struct MainView: View {
             MyDayView()
                 .tabItem {
                     Label("My day", systemImage: "medal.fill")
-                        .foregroundStyle(Color.red)
+                        .foregroundStyle(AppColors.cardBackgroundColor)
                 }
             ActivityView()
                 .tabItem {
@@ -30,9 +30,10 @@ struct MainView: View {
                     Label("Account", systemImage: "person.crop.circle")
                 }
         }
-        .tint(.red)
+        .tint(AppColors.cardbackgroundColorEnd)
         .onAppear(perform: {
             UITabBar.appearance().unselectedItemTintColor = .gray
+            
             userData.checkSignIn()
         })
     }
