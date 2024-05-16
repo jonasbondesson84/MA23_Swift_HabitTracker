@@ -566,20 +566,30 @@ class UserViewModel: ObservableObject {
     }
     
     func getBadgeFor(activity: Activity, streak: Int) {
+        var categoryImage = ""
+        switch (activity.category.name) {
+        case "Running" : categoryImage = "label-5028260_640"
+        case "Swimming" : categoryImage = "label-orange"
+        case "Cycling" : categoryImage = "label-red"
+        case "Walking" : categoryImage = "label-yellow"
+        case "Gym Session" : categoryImage = "label-purple"
+        case "Dancing" : categoryImage = "label-green"
+        default : categoryImage = "label-5028260_640"
+        }
         
         if streak == 5 {
-            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640", categoryImage: activity.category.image)
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: categoryImage, categoryImage: activity.category.image)
             updateDbWith(newBadge: newBadge)
         } else if streak == 10 {
-            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640", categoryImage: activity.category.image)
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: categoryImage, categoryImage: activity.category.image)
             updateDbWith(newBadge: newBadge)
         }
         else if streak == 30 {
-            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640", categoryImage: activity.category.image)
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: categoryImage, categoryImage: activity.category.image)
             updateDbWith(newBadge: newBadge)
         }
         else if streak == 100 {
-            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640", categoryImage: activity.category.image)
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: categoryImage, categoryImage: activity.category.image)
             updateDbWith(newBadge: newBadge)
         }
         
@@ -910,6 +920,13 @@ class UserViewModel: ObservableObject {
         categories.append(swimming)
         let cycling = Category(name: "Cycling", image: "figure.outdoor.cycle")
         categories.append(cycling)
+        let walking = Category(name: "Walking", image: "figure.walk")
+        categories.append(walking)
+        let gymSession = Category(name: "Gym Session", image: "dumbbell")
+        categories.append(gymSession)
+        let dancing = Category(name: "Dancing", image: "figure.dancing")
+        categories.append(dancing)
+        let other = Category(name: "Other", image: "trophy")
     }
     
     func creatDummyData() {

@@ -67,6 +67,7 @@ struct AddActivitySheet: View {
                         
                         LabeledContent("Category") {
                             Picker("", selection: $category) {
+                                Text("Select category")
                                 ForEach(userData.categories) { category in
                                     Text("\(category.name)").tag(category as Category)
                                 }
@@ -103,6 +104,7 @@ struct AddActivitySheet: View {
                                 Text(edit ? "Update" : "Save")
                             })
                             .buttonStyle(BorderlessButtonStyle())
+                            .disabled(name.isEmpty || category == .emptyCategory)
                             Spacer()
                             Button (action: {
                                 print("cancel")
@@ -193,6 +195,7 @@ struct AddOfficeWorkoutSheet: View {
                                 Text("Save")
                             }
                             .buttonStyle(BorderlessButtonStyle())
+                            .disabled(name.isEmpty)
                             Spacer()
                             Button {
                                 userData.setShowSheetFor(Workout: false)
