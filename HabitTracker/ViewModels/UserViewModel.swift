@@ -754,7 +754,13 @@ class UserViewModel: ObservableObject {
     }
     
     
-
+    func update(name: String) {
+        guard let userID = auth.currentUser?.uid else {return}
+        
+        db.collection("users").document(userID).updateData([
+            "name" : name
+        ])
+    }
     
     
 

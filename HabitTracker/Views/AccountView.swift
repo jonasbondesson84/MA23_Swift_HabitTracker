@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AccountView: View {
     @EnvironmentObject var userData: UserViewModel
-    @State var name: String = "Jonas"
+    @State var name: String = ""
     
     
     var body: some View {
@@ -21,23 +21,45 @@ struct AccountView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Image("badge_blue")
-                            .resizable()
+                        AsyncImage(url: URL(string: userData.user.imageUrl ?? "")) {phase in
+                            switch phase {
+                            case .empty:
+                                Image(systemName: "photo")
+                                    .font(.title)
+                            case .success(let image):
+                                image
+                                    .resizable()
+                            case .failure(let error):
+                                Image(systemName: "photo")
+                                    .resizable()
+                            default :
+                                Image(systemName: "photo")
+                            }
+                            
+                        }
+                            
                             .frame(width: 150, height: 150)
                             .scaledToFit()
                             .padding(.leading, 30)
                         Spacer()
                         
-                        nameView(name: $name)
+                        TextField("Name", text: $name)
+                            
+                            .padding()
+                            .background(Color.gray)
+                            .cornerRadius(20.0)
                             
                        
                     }
+                    .padding(.trailing, 20)
                     .frame(height: 100)
                     .padding(.top, 50)
                     .padding(.bottom, 20)
-                    AccountStreakView()
                     Spacer()
                     
+                }
+                Button("Save") {
+                    userData.update(name: name)
                 }
                 
             }
@@ -46,7 +68,9 @@ struct AccountView: View {
                     userData.signOut()
                 }
                 .foregroundColor(.white))
-            
+            .onAppear() {
+                name = userData.user.name
+            }
         }
     }
 }
