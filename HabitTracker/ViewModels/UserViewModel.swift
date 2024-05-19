@@ -21,6 +21,9 @@ class UserViewModel: ObservableObject {
     @Published var badges = [Badge]()
     @Published var showNewBadge: Bool = false
     @Published var activityStats = [ActivityStats]()
+    @Published var activityStatsDay = [ActivityStats]()
+    @Published var activityStatsWeek = [ActivityStats]()
+    @Published var activityStatsMonth = [ActivityStats]()
     @Published var showSheetActivity = false
     @Published var showSheetWorkout = false
     
@@ -680,10 +683,18 @@ class UserViewModel: ObservableObject {
 //    }
     
     func getActivityStats() {
+//        getActivityStatsForDay()
+//        getActivityStatsForWeek()
+//        getActivityStatsForMonth()
         guard let userID = auth.currentUser?.uid else {return}
         activityStats.removeAll()
+        let currentMonth = Calendar.current.component(.month, from: Date.now)
+        let currentWeek = Calendar.current.component(.weekOfYear, from: Date.now)
         for activity in activities {
             var list = [ActivityEntry]()
+            var listDay = [ActivityEntry]()
+            var listWeek = [ActivityEntry]()
+            var listMonth = [ActivityEntry]()
             if let docID = activity.docID {
                 db.collection("users").document(userID).collection(ACTIVITY).document(docID).collection(ACTIVITY_ENTRY).getDocuments() { snapshot, error in
                 
@@ -695,8 +706,22 @@ class UserViewModel: ObservableObject {
                                     for document in snapshot.documents {
                                         let entry = try document.data(as: ActivityEntry.self)
                                         list.append(entry)
+                                        if let date = entry.date {
+                                            if Calendar.current.isDateInToday(date) {
+                                                listDay.append(entry)
+                                            }
+                                            if Calendar.current.component(.weekOfYear, from: date) == currentWeek {
+                                                print("Week for entry \(date)")
+                                                listWeek.append(entry)
+                                            }
+                                            if Calendar.current.component(.month, from: date) == currentMonth {
+                                                print("Month for entry \(date)")
+                                                listMonth.append(entry)
+                                            }
+                                            
+                                        }
                                     }
-                                    let stats = ActivityStats(name: activity.name, entries: list)
+                                    let stats = ActivityStats(name: activity.name, entries: list, entriesDay: listDay, entriesWeek: listWeek, entriesMonth: listMonth)
                                     self.activityStats.append(stats)
                                     print("\(self.activityStats.count) \(stats.name)")
                 
@@ -710,6 +735,119 @@ class UserViewModel: ObservableObject {
             }
         }
     }
+//    func getActivityStatsForDay() {
+//        guard let userID = auth.currentUser?.uid else {return}
+//        activityStatsDay.removeAll()
+//        for activity in activities {
+//            var list = [ActivityEntry]()
+//            if let docID = activity.docID {
+//                db.collection("users").document(userID).collection(ACTIVITY).document(docID).collection(ACTIVITY_ENTRY).getDocuments() { snapshot, error in
+//                
+//                            guard let snapshot = snapshot else {return}
+//                            do {
+//                                if let error = error {
+//                                    print("error getting activityEntry \(error)")
+//                                } else {
+//                                    for document in snapshot.documents {
+//                                        let entry = try document.data(as: ActivityEntry.self)
+//                                        if let date = entry.date {
+//                                            if Calendar.current.isDateInToday(date) {
+//                                                list.append(entry)
+//                                            }
+//                                        }
+//                                    }
+//                                    let stats = ActivityStats(name: activity.name, entries: list)
+//                                    self.activityStatsDay.append(stats)
+//                                    print("\(self.activityStatsDay.count) \(stats.name)")
+//                
+//                                }
+//                                
+//                            } catch {
+//                                print("Error")
+//                            }
+//                
+//                        }
+//            }
+//        }
+//    }
+//    func getActivityStatsForWeek() {
+//        guard let userID = auth.currentUser?.uid else {return}
+//        activityStatsDay.removeAll()
+//        let currentWeek = Calendar.current.component(.weekOfYear, from: Date.now)
+//        print("CurrentWeek: \(currentWeek)")
+//        for activity in activities {
+//            var list = [ActivityEntry]()
+//            if let docID = activity.docID {
+//                db.collection("users").document(userID).collection(ACTIVITY).document(docID).collection(ACTIVITY_ENTRY).getDocuments() { snapshot, error in
+//                
+//                            guard let snapshot = snapshot else {return}
+//                            do {
+//                                if let error = error {
+//                                    print("error getting activityEntry \(error)")
+//                                } else {
+//                                    for document in snapshot.documents {
+//                                        let entry = try document.data(as: ActivityEntry.self)
+//                                        if let date = entry.date {
+//                                            if Calendar.current.component(.weekOfYear, from: date) == currentWeek {
+//                                                print("Week for entry \(date)")
+//                                                list.append(entry)
+//                                            }
+//                                        }
+//                                    }
+//                                    let stats = ActivityStats(name: activity.name, entries: list)
+//                                    self.activityStatsDay.append(stats)
+//                                    print("\(self.activityStatsDay.count) \(stats.name)")
+//                
+//                                }
+//                                
+//                            } catch {
+//                                print("Error")
+//                            }
+//                
+//                        }
+//            }
+//        }
+//    }
+//    func getActivityStatsForMonth() {
+//        guard let userID = auth.currentUser?.uid else {return}
+//        activityStatsDay.removeAll()
+//        let currentMonth = Calendar.current.component(.month, from: Date.now)
+//        print("CurrentWeek: \(currentMonth)")
+//        for activity in activities {
+//            var list = [ActivityEntry]()
+//            if let docID = activity.docID {
+//                db.collection("users").document(userID).collection(ACTIVITY).document(docID).collection(ACTIVITY_ENTRY).getDocuments() { snapshot, error in
+//                
+//                            guard let snapshot = snapshot else {return}
+//                            do {
+//                                if let error = error {
+//                                    print("error getting activityEntry \(error)")
+//                                } else {
+//                                    for document in snapshot.documents {
+//                                        let entry = try document.data(as: ActivityEntry.self)
+//                                        if let date = entry.date {
+//                                            if Calendar.current.component(.month, from: date) == currentMonth {
+//                                                print("Month for entry \(date)")
+//                                                list.append(entry)
+//                                            }
+//                                        }
+//                                    }
+//                                    let stats = ActivityStats(name: activity.name, entries: list)
+//                                    self.activityStatsDay.append(stats)
+//                                    print("\(self.activityStatsDay.count) \(stats.name)")
+//                
+//                                }
+//                                
+//                            } catch {
+//                                print("Error")
+//                            }
+//                
+//                        }
+//            }
+//        }
+//    }
+//    
+    
     
     func createAccount(email: String, password: String, name: String) {
         

@@ -23,7 +23,7 @@ struct MainView: View {
                 }
             ActivityStatsView()
                 .tabItem {
-                    Label("Calendar", systemImage: "calendar")
+                    Label("Statistics", systemImage: "chart.bar.xaxis")
                 }
             AccountView()
                 .tabItem {
