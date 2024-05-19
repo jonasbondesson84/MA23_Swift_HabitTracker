@@ -96,7 +96,7 @@ struct AddActivitySheet: View {
                                 let newActivity = Activity(name: name, date: date, repeating: recurrent, category: category, lastEntry: ActivityEntry(), todaysEntry: ActivityEntry())
                                 userData.saveActivityToFireStore(activity: newActivity)
                             }
-                            userData.setShowSheet(showSheet: false)
+                            userData.setShowSheetFor(Activity: false)
                             
                         }, label: {
                             Text(edit ? "Update" : "Save")
@@ -107,7 +107,7 @@ struct AddActivitySheet: View {
                         
                         Button (action: {
                             print("cancel")
-                            userData.setShowSheet(showSheet: false)
+                            userData.setShowSheetFor(Activity: false)
                         }, label: {
                             Text("Cancel")
                         })
@@ -180,7 +180,7 @@ struct AddOfficeWorkoutSheet: View {
                                 userData.saveOfficeWorkoutToFireStore(workout: newWorkout)
                             }
                             
-                            userData.setShowSheet(showSheet: false)
+                            userData.setShowSheetFor(Workout: false)
                             
                         } label: {
                             Text("Save")
@@ -188,7 +188,7 @@ struct AddOfficeWorkoutSheet: View {
                         .buttonStyle(BorderlessButtonStyle())
                         Spacer()
                         Button {
-                            userData.setShowSheet(showSheet: false)
+                            userData.setShowSheetFor(Workout: false)
                         } label: {
                             Text("Cancel")
                         }
@@ -252,7 +252,7 @@ struct MyOfficeWorkoutList: View {
                     .onTapGesture {
                         selectedWorkout = officeWorkOut
                         edit = true
-                        userData.setShowSheet(showSheet: true)
+                        userData.setShowSheetFor(Workout: true)
                     }
                 }
             .onDelete(perform: { indexSet in
@@ -267,7 +267,7 @@ struct MyOfficeWorkoutList: View {
             .listRowBackground(AppColors.backgroundColor)
             
         }
-        .sheet(isPresented: $userData.showSheet, content: {
+        .sheet(isPresented: $userData.showSheetWorkout, content: {
             if userData.loggedIn {
                 AddOfficeWorkoutSheet(workout: $selectedWorkout, edit: $edit)
                     .presentationBackground(.background)
@@ -295,7 +295,7 @@ struct MyOfficeWorkoutList: View {
         Button(action: {
             selectedWorkout = nil
             edit = false
-            userData.setShowSheet(showSheet: true)
+            userData.setShowSheetFor(Workout: true)
 //            userData.saveOfficeWorkoutToFireStore(workout: OfficeWorkout(name: "Strech", repeatTimeHours: 1.5))
 
         }, label: {
@@ -338,7 +338,7 @@ struct MyActivityList: View {
                     selectedActivity = activity
                     
                     edit = true
-                    userData.setShowSheet(showSheet: true)
+                    userData.setShowSheetFor(Activity: true)
                 }
             }
             .onDelete(perform: { indexSet in
@@ -354,7 +354,7 @@ struct MyActivityList: View {
         .listStyle(.plain)
         .padding(.horizontal, 40)
         .scrollContentBackground(.hidden)
-        .sheet(isPresented: $showSheet, content: {
+        .sheet(isPresented: $userData.showSheetActivity, content: {
             if userData.loggedIn {
                 AddActivitySheet(activity: $selectedActivity, edit: $edit)
                     .presentationBackground(.background)
@@ -377,7 +377,7 @@ struct MyActivityList: View {
         Button(action: {
             selectedActivity = nil
             edit = false
-            userData.setShowSheet(showSheet: true)
+            userData.setShowSheetFor(Activity: true)
 
         }, label: {
             Label("Add activity", systemImage: "plus")

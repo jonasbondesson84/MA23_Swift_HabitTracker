@@ -252,6 +252,8 @@ struct BadgesView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 60)
+                        Image(systemName: badge.categoryImage)
+                            .offset(y: -15)
                         Text(badge.name)
                             .font(.footnote)
                             .offset(y: -2)
@@ -278,19 +280,19 @@ struct StreakView : View {
     var body: some View {
         ZStack {
             Circle()
-                .trim(from: 0.2, to: 1)
-                .rotation(.degrees(54))
+                .trim(from: 0, to: 1)
+//                .rotation(.degrees(54))
                 .stroke(
                     Color.blue.opacity(0.5),
-                    lineWidth: 5
+                    lineWidth: 8
                 )
             
             Circle()
-                .trim(from: 0.0, to: 0.2)
-                .rotation(.degrees(54))
+                .trim(from: 0, to: userData.user.getArc())
+                .rotation(.degrees(92))
                 .stroke(
                     Color.green,
-                    lineWidth: 5
+                    lineWidth: 8
                 )
             VStack {
                 Text("Days: ")
@@ -312,8 +314,8 @@ struct StreakView : View {
         }
         .frame(width: 150, height: 150)
         .onAppear() {
-            targetTrack = Double(userData.user.totalStreak / userData.user.getTarget())
-            print("\(targetTrack)")
+//            targetTrack = Double(userData.user.totalStreak / userData.user.getTarget())
+            print("onAppear: \(userData.user.getArc())")
         }
     }
 }

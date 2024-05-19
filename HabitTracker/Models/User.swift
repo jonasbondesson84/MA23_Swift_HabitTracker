@@ -44,5 +44,13 @@ class User : ObservableObject, Decodable, Encodable {
         }
     }
     
+    func getArc() -> Double {
+        print("TotalStreak: \(Double(self.totalStreak))")
+        print("getTarget: \(self.getTarget())")
+        let arcNr = Double(self.totalStreak)/Double(self.getTarget())
+        print("arc: \(arcNr)")
+        return arcNr
+    }
+    
     
 }

@@ -21,8 +21,8 @@ class UserViewModel: ObservableObject {
     @Published var badges = [Badge]()
     @Published var showNewBadge: Bool = false
     @Published var activityStats = [ActivityStats]()
-    @Published var showSheet = false
-        
+    @Published var showSheetActivity = false
+    @Published var showSheetWorkout = false
     
     @Published var activities = [Activity]()
     @Published var officeWorkouts = [OfficeWorkout]()
@@ -32,6 +32,7 @@ class UserViewModel: ObservableObject {
     @Published var streak = 0
     @Published var loggedIn = false
     @Published var newAccount = false
+    
     let db = Firestore.firestore()
     let auth = Auth.auth()
     let ACTIVITY = "activity"
@@ -44,8 +45,11 @@ class UserViewModel: ObservableObject {
 //        creatDummyData()
         createCategories()
     }
-    func setShowSheet(showSheet: Bool) {
-        self.showSheet = showSheet
+    func setShowSheetFor(Activity: Bool) {
+        self.showSheetActivity = Activity
+    }
+    func setShowSheetFor(Workout: Bool) {
+        self.showSheetWorkout = Workout
     }
     
     func signOut() {
@@ -87,7 +91,7 @@ class UserViewModel: ObservableObject {
                 
                 self.getUserData(userID: userID)
                 self.loggedIn = true
-                self.showSheet = false
+                self.showSheetActivity = false
             }
             
         }
@@ -409,7 +413,8 @@ class UserViewModel: ObservableObject {
             }
             print("\(totalStreak)")
             db.collection("users").document(userID).updateData([
-                "totalStreak" : totalStreak
+                "totalStreak" : totalStreak,
+                "lastDateForStreak" : Date.now
             ])
         }
     }
@@ -560,18 +565,18 @@ class UserViewModel: ObservableObject {
     func getBadgeFor(activity: Activity, streak: Int) {
         
         if streak == 5 {
-            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640")
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640", categoryImage: activity.category.image)
             updateDbWith(newBadge: newBadge)
         } else if streak == 10 {
-            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640")
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640", categoryImage: activity.category.image)
             updateDbWith(newBadge: newBadge)
         }
         else if streak == 30 {
-            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640")
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640", categoryImage: activity.category.image)
             updateDbWith(newBadge: newBadge)
         }
         else if streak == 100 {
-            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640")
+            let newBadge = Badge(name: activity.name, streak: streak, category: activity.category.name, image: "label-5028260_640", categoryImage: activity.category.image)
             updateDbWith(newBadge: newBadge)
         }
         
@@ -714,7 +719,7 @@ class UserViewModel: ObservableObject {
             } else {
                 guard let userID = result?.user.uid else {return}
                 self.saveNewUserInfo(userID: userID, name: name)
-                self.showSheet = false
+                self.showSheetActivity = false
             }
             
         }
@@ -747,6 +752,7 @@ class UserViewModel: ObservableObject {
             }
         }
     }
+    
     
 
     
